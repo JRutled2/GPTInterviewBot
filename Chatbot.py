@@ -1,3 +1,4 @@
+from flask.wrappers import Response
 import openai
 
 class Bot():
@@ -27,17 +28,17 @@ class Bot():
             userin = input('> ')
 
         # Asks about what they plan on completing in the upcoming week
-        message_log = [{'role': 'system', 'content': f'You are asking a group about what they plan to complete in the next week.  The team members in the group are {self.team_members}.'},
-                       {'role': 'system', 'content': "If their statements don't fulfll the S.M.A.R.T. goals, ask me more questions that will fulfill them.  Make sure each team member plans on acomplishing something.  Only ask them one question at a time.  When they have fulfilled all the S.M.A.R.T. goals, say Done!"}]
-        completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=message_log, temperature=0)
+        self.message_log = [{'role': 'system', 'content': "You are asking me about what I plan to complete in the next week."},
+                {'role': 'system', 'content': "If my statements don't fulfll the S.M.A.R.T. goals, ask me more questions that will fulfill them.  Only ask me one question at a time.  When I have fulfilled all the S.M.A.R.T. goals, say Done!"}]
+        completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=self.message_log, temperature=0)
         print(completion.choices[0].message.content)
-        message_log += [{'role': 'assistant', 'content': completion.choices[0].message.content}]
+        self.message_log += [{'role': 'assistant', 'content': completion.choices[0].message.content}]
         userin = input('> ')
-        while userin == 'quit':
+        while userin != 'quit':
             response = self.chat(userin)
             if 'Done!' in response:
                 break
             print(response)
             userin = input('> ')
 
-        print('Finished!')
+print('Finished!')
