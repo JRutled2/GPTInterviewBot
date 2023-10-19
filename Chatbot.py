@@ -13,16 +13,17 @@ class Bot():
         chat_stage (int): Keeps track of current stage in the interview, used for the chat function.
             chat_stage  Chat aspect         Method Called
             ---------   -----------         -------------
-                0       Previous Week       chat_previous_week()
-                1       Problems            chat_problems()
-                2       Plans               XXX
-                3       Concerns            XXX
+                0       Previous Week       chat_previous_week
+                1       Problems            chat_problems
+               2/3      Plans               chat_plans
+                4       Concerns            chat_concerns
         temp_members (list[str]): List of team members that is modified for specific funtions
+        
     """
     
     def __init__(self, gpt_key: str, ) -> None:  
         # Stores all the team members
-        self.team_members: list[str] = []
+        self.team_members: list[str] = ['JD']
         # Stores the message log
         self.message_log: list[dict[str]] = []
         # Current stage in chat function
@@ -41,6 +42,7 @@ class Bot():
             
         ChatCompletion API:
         https://platform.openai.com/docs/api-reference/completions/create
+        
         """
         
         # Completion object that contains the output from GPT
@@ -61,6 +63,7 @@ class Bot():
         
         Returns:
             list[dict[str]]: This method returns the current chatlog, past chats and any newly added chats
+            
         """
         
         # If the userinput is not empty, then it adds it onto the end.
@@ -73,6 +76,10 @@ class Bot():
             self.chat_previous_week()
         elif self.chat_stage == 1:
             self.chat_problems()
+        elif self.chat_stage in [2, 3]:
+            self.chat_plans()
+        elif self.chat_stage == 4:
+            self.chat_concerns()
         
         # Returns the message_logs
         return self.message_log
@@ -81,7 +88,8 @@ class Bot():
         """ Previous Week Chat Method
         
         This method asks each team member what they have acomplished in the past week.
-        Each time it is called it asks the next team member what they acomplished
+        Each time it is called it asks the next team member what they acomplished.
+        
         """
         
         # If it the last team member, it increases the chat stage
@@ -97,12 +105,47 @@ class Bot():
     def chat_problems(self, ) -> None:
         """ Asks if the User Had Any Problems
         
+        This method asks the user if they had any problems they were unable
+        to solve in the last week.
+        
         TODO: Add Dynamic Questions
         
         """
+        
+        # Increases the chat stage
         self.chat_stage = 2
+        
+        # Adds the problem question to the message_log
         message_log += [{'role': 'assistant', 'content': f'Have you had any problems that you were unable to solve?'}]
     
+    def chat_plans(self, ) -> None:
+        """ Asks about Plans for Upcoming Week
+        
+        This method asks about the users plans for the upcoming week.
+        The first time it is called, it adds the system content to the message log.
+        
+        """
+        
+        # If the stage is 2, it adds the system content.
+        # The stage will only be 2 the first time it is called.
+        if self.chat_stage == 2:
+            message_log += [{'role': 'system', 'content': "You are asking me about what I plan to complete in the next week."},
+                            {'role': 'system', 'content': "If my statements don't fulfll the S.M.A.R.T. goals, ask me more questions that will fulfill them.  Only ask me one question at a time.  When I have fulfilled all the S.M.A.R.T. goals, say Done!"}]
+            self.chat_stage = 3
+        self.ask_gpt
+    
+    def chat_concerns(self, ) -> None:
+        """ Asks about Any Concerns They Have
+        
+        This method asks the users about any concerns they may have.
+        
+        TODO: Add Dynamic Questions
+        
+        """
+        
+        # Adds the question about concerns to the message_log
+        message_log += [{'role': 'assistant', 'content': f'Do you have any other comments or concerns?'}]
+
     # Old Chat Function
     def OLD_weekly_chat(self, ):
         # Asks Each team member what they acomplished in the past week
@@ -125,30 +168,3 @@ class Bot():
                 break
             print(response)
             userin = input('> ')
-
-def chat(message_log, stage, key):
-        
-    # Stage is -n for n number of team members, ask what they acomplished in the past week
-    if stage < 0:
-        stage += 1
-        message_log += [{'role': 'assistant', 'content': 'Hello, what have you acomplished in the past week?'}]
-        return message_log, stage
-    
-    # Stage 0 ask if they had any problens
-    if stage == 0:
-        message_log += [{'role': 'assistant', 'content': 'Did you have any problems you need help with?'}]
-        return message_log, 1
-
-    # Stage 1 is an intermediary stage where roles are added to the message log
-    if stage == 1:
-        openai.api_key = key
-        message_log += [{'role': 'system', 'content': "You are asking me about what I plan to complete in the next week."},
-                        {'role': 'system', 'content': "If my statements don't fulfll the S.M.A.R.T. goals, ask me more questions that will fulfill them.  Only ask me one question at a time.  When I have fulfilled all the S.M.A.R.T. goals, say Done!"}]
-        message_log = ask_gpt(message_log)
-        return message_log, 2
-
-    # Stage 2 is the normal plan conversations
-    if stage == 2:
-        openai.api_key = key
-        message_log = ask_gpt(message_log)
-        return message_log, 2
