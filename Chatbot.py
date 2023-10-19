@@ -1,6 +1,7 @@
 from flask.wrappers import Response
 import openai
 
+# Old Bot Object, Depreciated
 class Bot():
 
     def __init__(self, gpt_key):
@@ -67,6 +68,7 @@ def chat(message_log, stage, key):
         message_log = ask_gpt(message_log)
         return message_log, 2
 
+    # Stage 2 is the normal plan conversations
     if stage == 2:
         openai.api_key = key
         message_log = ask_gpt(message_log)

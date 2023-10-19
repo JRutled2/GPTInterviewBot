@@ -2,10 +2,10 @@ from Chatbot import Bot
 import sqlite3
 import bcrypt 
 
-def create_DB():
+def create_user_DB():
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
-    f = open('blueprint.sql','r').read()
+    f = open('user_db_blueprint.sql','r').read()
     c.executescript(f)
     conn.commit()
     c.close()
@@ -24,9 +24,24 @@ def add_dummy_user():
         INSERT INTO users VALUES ("test", "{hash}", "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");
         ''')
 
-uin = input('Rebuild Database? (y/n)\n>')
+def create_interview_DB():
+    conn = sqlite3.connect('interviews.db')
+    c = conn.cursor()
+    f = open('interviews_blueprint.sql','r').read()
+    c.executescript(f)
+    conn.commit()
+    c.close()
+    conn.close()
+    pass
+
+
+uin = input('Rebuild User Database? (y/n)\n>')
 if uin == 'y':
-    create_DB()
-uin = input('Add Dummy User? (y/n)\n>')
+    create_user_DB()
+    uin = input('Add Dummy User? (y/n)\n>')
+    if uin == 'y':
+        add_dummy_user()
+
+uin = input('Rebuild Interview Database? (y/n)\n>')
 if uin == 'y':
-    add_dummy_user()
+    create_interview_DB()
