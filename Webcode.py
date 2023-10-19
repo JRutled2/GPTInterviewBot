@@ -1,7 +1,7 @@
 from flask.globals import request
 from flask.helpers import url_for
 from flask.templating import render_template
-from Chatbot import Bot, chat
+from Chatbot import chat
 from flask import Flask, session, redirect
 
 app = Flask(__name__)
@@ -20,11 +20,11 @@ def index():
 
 @app.route('/chat', methods=['GET', 'POST'])
 def user_chat():
-    if request.method == 'GET':
-        return redirect(url_for('index'))
+    #if request.method == 'GET':
+    #    return redirect(url_for('index'))
     
     if 'uname' in session:
-        if 'chat' in in request.form:
+        if 'chat' in request.form:
             session['message_log'] += [{'role': 'user', 'content': request.form['chat']}]
         session['message_log'], session['chat_stage'] = chat(session['message_log'], session['chat_stage'], session['gptkey'])
         return render_template('chat.j2', message_log=session['message_log'])

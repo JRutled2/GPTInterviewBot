@@ -41,15 +41,33 @@ class Bot():
             print(response)
             userin = input('> ')
     
+def ask_gpt(message_log):
+        completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=message_log, temperature=0)
+        message_log += [{'role': 'assistant', 'content': completion.choices[0].message.content}]
+        return message_log
+
 def chat(message_log, stage, key):
         
-    # Stage is -n for n number of team members
-    if stage <= 0:
+    # Stage is -n for n number of team members, ask what they acomplished in the past week
+    if stage < 0:
         stage += 1
         message_log += [{'role': 'assistant', 'content': 'Hello, what have you acomplished in the past week?'}]
         return message_log, stage
     
-    # Stage 1
-    if stage == 1:
+    # Stage 0 ask if they had any problens
+    if stage == 0:
         message_log += [{'role': 'assistant', 'content': 'Did you have any problems you need help with?'}]
-        return message_log, stage
+        return message_log, 1
+
+    # Stage 1 is an intermediary stage where roles are added to the message log
+    if stage == 1:
+        openai.api_key = key
+        message_log += [{'role': 'system', 'content': "You are asking me about what I plan to complete in the next week."},
+                        {'role': 'system', 'content': "If my statements don't fulfll the S.M.A.R.T. goals, ask me more questions that will fulfill them.  Only ask me one question at a time.  When I have fulfilled all the S.M.A.R.T. goals, say Done!"}]
+        message_log = ask_gpt(message_log)
+        return message_log, 2
+
+    if stage == 2:
+        openai.api_key = key
+        message_log = ask_gpt(message_log)
+        return message_log, 2

@@ -5,6 +5,11 @@
 {% endblock %}
 
 {% block content %}
+{% for i in message_log %}
+	{% if i['role'] == 'assistant' %}
+	<p>{{i['content']}}</p>
+	{% endif %}
+{% endfor %}
 <form action="{{url_for('user_chat')}}" method="POST">
 	<textarea id="chat" name="chat" rows="4" cols="50"></textarea>
 	<button type="submit">Send</button>
