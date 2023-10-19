@@ -10,12 +10,14 @@ app.secret_key = 'any random string'
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        if 'uname' in request.form:
+        if ['uname', 'pword', 'gptkey'] in request.form:
             session['uname'] = request.form['uname']
+            session['gptkey'] = request.form['gptkey']
+            session['bot'] = Bot(request.form['gptkey'])
             return redirect(url_for('user_chat'))
     return render_template('login.j2')
 
-@app.route('/chat')
+@app.route('/chat', methods=['GET', 'POST'])
 def user_chat():
     if 'uname' in session:
         return render_template('chat.j2')
