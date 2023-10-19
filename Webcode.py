@@ -34,7 +34,3 @@ def user_chat():
 
 if __name__ == '__main__':
     app.run()
-
-''' My personal API key:
-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
-'''
