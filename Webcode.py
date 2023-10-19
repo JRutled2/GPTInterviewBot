@@ -13,7 +13,7 @@ def index():
         if 'uname' in request.form:
             session['uname'] = request.form['uname']
             return redirect(url_for('user_chat'))
-    return render_template('main.html')
+    return render_template('login.j2')
 
 @app.route('/chat')
 def user_chat():

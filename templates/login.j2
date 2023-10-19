@@ -1,0 +1,8 @@
+{% extends "main.html" %}
+{% block content %}
+<form action="{{url_for('index')}}" method="POST">
+	<input type="text" placeholder="Username" name="uname" id="uname" required>
+	<input type="password" placeholder="Password" name="pword" id="pword" required>
+	<button type="submit">Login</button>
+</form>
+{% endblock %}
