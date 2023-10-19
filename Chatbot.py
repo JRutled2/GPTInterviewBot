@@ -6,7 +6,7 @@ class Bot():
     def __init__(self, gpt_key):
         openai.api_key = gpt_key
 
-        self.team_members = ['Mike', 'John', 'Bill']
+        self.team_members = ['Mike']
 
         self.message_log = []
 
@@ -40,5 +40,16 @@ class Bot():
                 break
             print(response)
             userin = input('> ')
-
-print('Finished!')
+    
+def chat(message_log, stage, key):
+        
+    # Stage is -n for n number of team members
+    if stage <= 0:
+        stage += 1
+        message_log += [{'role': 'assistant', 'content': 'Hello, what have you acomplished in the past week?'}]
+        return message_log, stage
+    
+    # Stage 1
+    if stage == 1:
+        message_log += [{'role': 'assistant', 'content': 'Did you have any problems you need help with?'}]
+        return message_log, stage
