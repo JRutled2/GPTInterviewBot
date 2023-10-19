@@ -18,7 +18,7 @@ def index():
 @app.route('/chat')
 def user_chat():
     if 'uname' in session:
-        return f'Hello, {session["uname"]}.'
+        return render_template('chat.j2')
     else:
         return redirect(url_for('index'))
 
