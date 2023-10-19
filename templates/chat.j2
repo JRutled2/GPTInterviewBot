@@ -7,9 +7,9 @@
 {% block content %}
 {% for i in message_log %}
 	{% if i['role'] == 'assistant' %}
-	<p align="left">{{i['content']}}</p>
+	<p align="left" font-size="24">{{i['content']}}</p>
 	{% elif i['role'] == 'user'%}
-	<p align="right">{{i['content']}}</p>
+	<p align="right" font-size="24">{{i['content']}}</p>
 	{% endif %}
 {% endfor %}
 <form action="{{url_for('user_chat')}}" method="POST">
