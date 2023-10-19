@@ -1,7 +1,7 @@
 from flask.globals import request
 from flask.helpers import url_for
 from flask.templating import render_template
-from Chatbot import chat
+from Chatbot import Bot, chat
 from flask import Flask, session, redirect
 
 app = Flask(__name__)
@@ -15,6 +15,7 @@ def index():
             session['gptkey'] = request.form['gptkey']
             session['chat_stage'] = -1
             session['message_log'] = []
+            app.config['bot'] = Bot(request.form['gptkey'])
             return redirect(url_for('user_chat'))
     return render_template('login.j2')
 

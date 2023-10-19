@@ -1,26 +1,43 @@
 from flask.wrappers import Response
 import openai
 
-# Old Bot Object, Depreciated
-class Bot():
-
-    def __init__(self, gpt_key):
+class Bot():    
+    
+    def __init__(self, gpt_key: str) -> None:
+        # Sets the openai key
         openai.api_key = gpt_key
-
-        self.team_members = ['Mike']
-
+        # Stores all the team members
+        self.team_members = []
+        # Stores the message log
         self.message_log = []
+        # Current stage in chat function
+        self.chat_stage = 0
 
-    def chat(self, prompt):
-        self.message_log += [{'role': 'user', 'content': prompt}]
-        completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=self.message_log, temperature=0)
+    def ask_gpt(self, ) -> None:
+        """ Method that Generates a New Response From the GPT Model
+        
+        This method generates a ChatCompletion from the openai API
+        and adds output to the message_log variable.
+            
+        ChatCompletion API:
+        https://platform.openai.com/docs/api-reference/completions/create
+        """
+        
+        # Completion object that contains the output from GPT
+        completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", 
+                                                  messages=self.message_log, 
+                                                  temperature=0)
+        # Adds GPT output to the message log
         self.message_log += [{'role': 'assistant', 'content': completion.choices[0].message.content}]
-        return completion.choices[0].message.content
 
-    def test(self, ):
-        print(str(self.team_members))
-
-    def weekly_chat(self, ):
+    def chat(self, user_input: str) -> list[dict[str]]:
+        """ Chat Method That the User Interacts With
+        
+        """
+        return self.message_log
+    
+    # Old Chat Function
+    def OLD_weekly_chat(self, ):
         # Asks Each team member what they acomplished in the past week
         print(f'Hello, What did {self.team_members[0]} acomplish in the past week.')
         userin = input('> ')
@@ -41,11 +58,6 @@ class Bot():
                 break
             print(response)
             userin = input('> ')
-    
-def ask_gpt(message_log):
-        completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=message_log, temperature=0)
-        message_log += [{'role': 'assistant', 'content': completion.choices[0].message.content}]
-        return message_log
 
 def chat(message_log, stage, key):
         
