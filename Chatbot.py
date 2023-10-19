@@ -1,4 +1,3 @@
-from flask.wrappers import Response
 import openai
 
 class Bot():    
@@ -15,9 +14,10 @@ class Bot():
             chat_stage  Chat aspect         Method Called
             ---------   -----------         -------------
                 0       Previous Week       chat_previous_week()
-                1       Previous Problems   XXX
+                1       Problems            chat_problems()
                 2       Plans               XXX
                 3       Concerns            XXX
+        temp_members (list[str]): List of team members that is modified for specific funtions
     """
     
     def __init__(self, gpt_key: str, ) -> None:  
@@ -71,13 +71,37 @@ class Bot():
         # Calls appropriate method based on chat stage
         if self.chat_stage == 0:
             self.chat_previous_week()
-
+        elif self.chat_stage == 1:
+            self.chat_problems()
+        
+        # Returns the message_logs
         return self.message_log
     
     def chat_previous_week(self, ) -> None:
-        pass
-    
+        """ Previous Week Chat Method
         
+        This method asks each team member what they have acomplished in the past week.
+        Each time it is called it asks the next team member what they acomplished
+        """
+        
+        # If it the last team member, it increases the chat stage
+        if len(self.temp_members) == 1:
+            self.chat_stage = 1
+        
+        # Asks a different questions based on if it is the first time chatting
+        if len(self.temp_members) < len(self.temp_members):
+           message_log += [{'role': 'assistant', 'content': f'Hello, what has {self.temp_members[0]} acomplished in the past week?'}]
+        else:
+            message_log += [{'role': 'assistant', 'content': f'Thank you, now what has {self.temp_members[0]} acomplished in the past week?'}]
+    
+    def chat_problems(self, ) -> None:
+        """ Asks if the User Had Any Problems
+        
+        TODO: Add Dynamic Questions
+        
+        """
+        self.chat_stage = 2
+        message_log += [{'role': 'assistant', 'content': f'Have you had any problems that you were unable to solve?'}]
     
     # Old Chat Function
     def OLD_weekly_chat(self, ):
