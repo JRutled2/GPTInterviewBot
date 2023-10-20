@@ -25,7 +25,7 @@ class Bot():
         # Stores all the team members
         self.team_members: list[str] = ['JD']
         # Stores the message log
-        self.message_log: list[dict[str]] = []
+        self.message_log = [[]]
         # Current stage in chat function
         self.chat_stage: int = 0
         # Temp List of Team members used for tracking
@@ -35,6 +35,7 @@ class Bot():
         openai.api_key = gpt_key
 
     def ask_gpt(self, ) -> None:
+        print('Chat')
         """ Method that Generates a New Response From the GPT Model
         
         This method generates a ChatCompletion from the openai API
@@ -51,8 +52,9 @@ class Bot():
                                                   temperature=0)
         # Adds GPT output to the message log
         self.message_log += [{'role': 'assistant', 'content': completion.choices[0].message.content}]
+        print(completion.choices[0].message.content)
 
-    def chat(self, user_input: str, ) -> list[dict[str]]:
+    def chat(self, user_input: str, ):
         """ Chat Method That the User Interacts With
         
         This is the main function that the user calls when using the Chatbot.
@@ -97,10 +99,13 @@ class Bot():
             self.chat_stage = 1
         
         # Asks a different questions based on if it is the first time chatting
-        if len(self.temp_members) < len(self.temp_members):
-           message_log += [{'role': 'assistant', 'content': f'Hello, what has {self.temp_members[0]} acomplished in the past week?'}]
+        if len(self.temp_members) == len(self.temp_members):
+            self.message_log += [{'role': 'assistant', 'content': f'Hello, what has {self.temp_members[0]} acomplished in the past week?'}]
         else:
-            message_log += [{'role': 'assistant', 'content': f'Thank you, now what has {self.temp_members[0]} acomplished in the past week?'}]
+            self.message_log += [{'role': 'assistant', 'content': f'Thank you, now what has {self.temp_members[0]} acomplished in the past week?'}]
+        
+        # Removes first member from temp list
+        self.team_members = self.team_members[1:]
     
     def chat_problems(self, ) -> None:
         """ Asks if the User Had Any Problems
@@ -116,9 +121,10 @@ class Bot():
         self.chat_stage = 2
         
         # Adds the problem question to the message_log
-        message_log += [{'role': 'assistant', 'content': f'Have you had any problems that you were unable to solve?'}]
+        self.message_log += [{'role': 'assistant', 'content': f'Have you had any problems that you were unable to solve?'}]
     
     def chat_plans(self, ) -> None:
+        print('Plans')
         """ Asks about Plans for Upcoming Week
         
         This method asks about the users plans for the upcoming week.
@@ -129,10 +135,17 @@ class Bot():
         # If the stage is 2, it adds the system content.
         # The stage will only be 2 the first time it is called.
         if self.chat_stage == 2:
-            message_log += [{'role': 'system', 'content': "You are asking me about what I plan to complete in the next week."},
-                            {'role': 'system', 'content': "If my statements don't fulfll the S.M.A.R.T. goals, ask me more questions that will fulfill them.  Only ask me one question at a time.  When I have fulfilled all the S.M.A.R.T. goals, say Done!"}]
+            print('Stage 2')
+            self.message_log += [{'role': 'system', 'content': "You are asking me about what I plan to complete in the next week."},
+                                 {'role': 'system', 'content': "If my statements don't fulfll the S.M.A.R.T. goals, ask me more questions that will fulfill them.  Only ask me one question at a time.  When I have fulfilled all the S.M.A.R.T. goals, say Done!"}]
             self.chat_stage = 3
-        self.ask_gpt
+        
+        # Calls the GPT method
+        self.ask_gpt()
+        
+        # If GPT says "Done!", it increases the chat stage
+        if 'Done!' in self.message_log[-1]['content'] and self.message_log[-1]['role'] == 'assistant':
+            self.chat_stage = 4
     
     def chat_concerns(self, ) -> None:
         """ Asks about Any Concerns They Have
@@ -144,7 +157,7 @@ class Bot():
         """
         
         # Adds the question about concerns to the message_log
-        message_log += [{'role': 'assistant', 'content': f'Do you have any other comments or concerns?'}]
+        self.message_log += [{'role': 'assistant', 'content': f'Do you have any other comments or concerns?'}]
 
     # Old Chat Function
     def OLD_weekly_chat(self, ):
