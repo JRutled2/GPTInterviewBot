@@ -25,7 +25,7 @@ class Bot():
         # Stores all the team members
         self.team_members: list[str] = ['JD']
         # Stores the message log
-        self.message_log = [[]]
+        self.message_log = []
         # Current stage in chat function
         self.chat_stage: int = 0
         # Temp List of Team members used for tracking
@@ -36,6 +36,7 @@ class Bot():
 
     def ask_gpt(self, ) -> None:
         print('Chat')
+        print(self.message_log)
         """ Method that Generates a New Response From the GPT Model
         
         This method generates a ChatCompletion from the openai API
