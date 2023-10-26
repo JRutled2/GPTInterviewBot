@@ -1,16 +1,19 @@
+import sqlite3
+import bcrypt 
+from chatbot import Bot
+from flask import Flask, session, redirect
 from flask.globals import request
 from flask.helpers import url_for
 from flask.templating import render_template
-from chatbot import Bot
-from flask import Flask, session, redirect
 
 app = Flask(__name__)
 app.secret_key = 'any random string'
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    # If user attempted to login
     if request.method == 'POST':
-        if 'gptkey' in request.form:
+        if 'pword' in request.form:
             session['uname'] = request.form['uname']
             session['message_log'] = []
             app.config['bot'] = Bot(request.form['gptkey'])

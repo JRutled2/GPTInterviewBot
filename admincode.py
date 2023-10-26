@@ -22,6 +22,9 @@ def add_dummy_user():
     c.execute(f'''
         INSERT INTO users VALUES ("test", "{hash}", "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");
         ''')
+    conn.commit()
+    c.close()
+    conn.close()
 
 def create_interview_DB():
     conn = sqlite3.connect('interviews.db')
@@ -29,8 +32,19 @@ def create_interview_DB():
     f = open('schema/interviews_schema.sql','r').read()
     c.executescript(f)
     conn.commit()
+    c.close()
     conn.close()
     pass
+
+def add_dummy_interview_teams():
+    conn = sqlite3.connect('interviews.db')
+    c = conn.cursor()
+    c.execute(f'''
+        INSERT INTO teams VALUES (1, "Test Team 1");
+        INSERT INTO teams VALUES (1, "Test Team 2");
+        INSERT INTO teams VALUES (1, "Test Team 3");
+        INSERT INTO teams VALUES (1, "Test Team 4");
+        ''')
 
 
 uin = input('Rebuild User Database? (y/n)\n>')
