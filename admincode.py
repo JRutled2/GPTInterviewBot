@@ -19,9 +19,9 @@ def add_dummy_user():
 
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
-    c.execute(f'''
-        INSERT INTO users VALUES ("test", "{hash}", "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");
-        ''')
+    c.execute('''
+        INSERT INTO users VALUES ("test", ?, 1, "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");
+        ''', (hash,))
     conn.commit()
     c.close()
     conn.close()
@@ -45,7 +45,18 @@ def add_dummy_interview_teams():
         INSERT INTO teams VALUES (1, "Test Team 3");
         INSERT INTO teams VALUES (1, "Test Team 4");
         ''')
+    conn.commit()
+    c.close()
+    conn.close()
 
+def print_users():
+    conn = sqlite3.connect('users.db')
+    c = conn.cursor()
+    cur =  c.execute('SELECT * FROM users')
+    for row in cur.fetchall():
+        print(row)
+    c.close()
+    conn.close()
 
 uin = input('Rebuild User Database? (y/n)\n>')
 if uin == 'y':
@@ -57,3 +68,7 @@ if uin == 'y':
 uin = input('Rebuild Interview Database? (y/n)\n>')
 if uin == 'y':
     create_interview_DB()
+
+uin = input('Print Users? (y/n)\n>')
+if uin == 'y':
+    print_users()

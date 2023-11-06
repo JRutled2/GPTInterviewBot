@@ -23,7 +23,7 @@ class Bot():
     
     def __init__(self, gpt_key: str, ) -> None:  
         # Stores all the team members
-        self.team_members: list[str] = ['JD']
+        self.team_members: list[str] = ['test']
         # Stores the message log
         self.message_log = []
         # Current stage in chat function
