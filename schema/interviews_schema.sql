@@ -1,10 +1,5 @@
-DROP TABLE IF EXISTS teams;
+DROP TABLE IF EXISTS user_teams;
 DROP TABLE IF EXISTS weekly_chats;
-
-CREATE TABLE teams(
-	id INTEGER PRIMARY KEY,
-	team_name TEXT
-);
 
 CREATE TABLE user_teams(
 	username TEXT PRIMARY KEY,
@@ -13,6 +8,7 @@ CREATE TABLE user_teams(
 
 CREATE TABLE weekly_chats(
 	id INTEGER PRIMARY KEY,
-	week TEXT NOT NULL,
+	team_name TEXT NOT NULL,
+	chat_week TEXT NOT NULL,
 	interview TEXT
 );

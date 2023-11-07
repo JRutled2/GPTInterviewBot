@@ -23,20 +23,16 @@ class Bot():
     
     def __init__(self, gpt_key: str, ) -> None:  
         # Stores all the team members
-        self.team_members: list[str] = ['test']
-        # Stores the message log
+        self.team_members: list[str] = []
+        self.team_name = ''
         self.message_log = []
-        # Current stage in chat function
         self.chat_stage: int = 0
-        # Temp List of Team members used for tracking
         self.temp_members: list[str] = self.team_members
 
         # Sets the openai key
         openai.api_key = gpt_key
 
     def ask_gpt(self, ) -> None:
-        print('Chat')
-        print(self.message_log)
         """ Method that Generates a New Response From the GPT Model
         
         This method generates a ChatCompletion from the openai API
@@ -53,7 +49,6 @@ class Bot():
                                                   temperature=0)
         # Adds GPT output to the message log
         self.message_log += [{'role': 'assistant', 'content': completion.choices[0].message.content}]
-        print(completion.choices[0].message.content)
 
     def chat(self, user_input: str, ):
         """ Chat Method That the User Interacts With
@@ -125,7 +120,6 @@ class Bot():
         self.message_log += [{'role': 'assistant', 'content': f'Have you had any problems that you were unable to solve?'}]
     
     def chat_plans(self, ) -> None:
-        print('Plans')
         """ Asks about Plans for Upcoming Week
         
         This method asks about the users plans for the upcoming week.
@@ -136,7 +130,6 @@ class Bot():
         # If the stage is 2, it adds the system content.
         # The stage will only be 2 the first time it is called.
         if self.chat_stage == 2:
-            print('Stage 2')
             self.message_log += [{'role': 'system', 'content': "You are asking me about what I plan to complete in the next week."},
                                  {'role': 'system', 'content': "If my statements don't fulfll the S.M.A.R.T. goals, ask me more questions that will fulfill them.  Only ask me one question at a time.  When I have fulfilled all the S.M.A.R.T. goals, say Done!"}]
             self.chat_stage = 3

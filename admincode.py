@@ -19,9 +19,11 @@ def add_dummy_user():
 
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
-    c.execute('''
-        INSERT INTO users VALUES ("test", ?, 1, "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");
-        ''', (hash,))
+    c.execute('INSERT INTO users VALUES ("test admin", ?, 2, "TODO NOT WORKING");', (hash,))
+    c.execute('INSERT INTO users VALUES ("test 1", ?, 1, "TODO NOT WORKING");', (hash,))
+    c.execute('INSERT INTO users VALUES ("test 2", ?, 1, "TODO NOT WORKING");', (hash,))
+    c.execute('INSERT INTO users VALUES ("test 3", ?, 1, "TODO NOT WORKING");', (hash,))
+    c.execute('INSERT INTO users VALUES ("test 4", ?, 1, "TODO NOT WORKING");', (hash,))
     conn.commit()
     c.close()
     conn.close()
@@ -39,11 +41,11 @@ def create_interview_DB():
 def add_dummy_interview_teams():
     conn = sqlite3.connect('interviews.db')
     c = conn.cursor()
-    c.execute(f'''
-        INSERT INTO teams VALUES (1, "Test Team 1");
-        INSERT INTO teams VALUES (1, "Test Team 2");
-        INSERT INTO teams VALUES (1, "Test Team 3");
-        INSERT INTO teams VALUES (1, "Test Team 4");
+    c.executescript(f'''
+        INSERT INTO user_teams VALUES ("test 1", "Test Team 1");
+        INSERT INTO user_teams VALUES ("test 2", "Test Team 2");
+        INSERT INTO user_teams VALUES ("test 3", "Test Team 3");
+        INSERT INTO user_teams VALUES ("test 4", "Test Team 4");
         ''')
     conn.commit()
     c.close()
@@ -68,6 +70,9 @@ if uin == 'y':
 uin = input('Rebuild Interview Database? (y/n)\n>')
 if uin == 'y':
     create_interview_DB()
+    uin = input('Add Dummy teams? (y/n)\n>')
+    if uin == 'y':
+        add_dummy_interview_teams()
 
 uin = input('Print Users? (y/n)\n>')
 if uin == 'y':

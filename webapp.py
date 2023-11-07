@@ -23,7 +23,7 @@ def index():
         session['uname'] = login_attempt[0]
         session['access'] = login_attempt[1]
         session['message_log'] = []
-        app.config['bot'] = Bot(request.form['gptkey'])
+        app.config['bot'] = chatbot_setup(login_attempt[0], request.form['gptkey'])
         return redirect(url_for('user_chat'))
     return render_template('login.j2')
 
@@ -57,8 +57,24 @@ def login(uname, pword):
         return None
     return results[0], results[2], results[3]
 
-    pword = pword.encode('utf-8') 
+def chatbot_setup(username, gptkey):
+    conn = sqlite3.connect('interviews.db')
+    cur = conn.cursor()
 
+    results = cur.execute('SELECT * FROM user_teams WHERE username = ?', (username,))
+    team_name = results.fetchone()[1]
+
+    results = cur.execute('SELECT username FROM user_teams WHERE team_name = ?', (team_name,))
+    team_members = []
+    for i in results.fetchall():
+        print(i)
+        team_members += [i[0]]
+
+    bot = Bot(gptkey)
+    bot.team_members = team_members
+    bot.temp_members = team_members
+    bot.team_name = team_name
+    return bot
 
 if __name__ == '__main__': 
     #app.run(host='0.0.0.0', port=12429)
