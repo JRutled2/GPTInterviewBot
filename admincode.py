@@ -19,11 +19,11 @@ def add_dummy_user():
 
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
-    c.execute('INSERT INTO users VALUES ("test admin", ?, 2, "TODO NOT WORKING");', (hash,))
-    c.execute('INSERT INTO users VALUES ("test 1", ?, 1, "TODO NOT WORKING");', (hash,))
-    c.execute('INSERT INTO users VALUES ("test 2", ?, 1, "TODO NOT WORKING");', (hash,))
-    c.execute('INSERT INTO users VALUES ("test 3", ?, 1, "TODO NOT WORKING");', (hash,))
-    c.execute('INSERT INTO users VALUES ("test 4", ?, 1, "TODO NOT WORKING");', (hash,))
+    c.execute('INSERT INTO users VALUES ("Test Admin", ?, 2, "TODO NOT WORKING");', (hash,))
+    c.execute('INSERT INTO users VALUES ("Test User 1", ?, 1, "TODO NOT WORKING");', (hash,))
+    c.execute('INSERT INTO users VALUES ("Test User 2", ?, 1, "TODO NOT WORKING");', (hash,))
+    c.execute('INSERT INTO users VALUES ("Test User 3", ?, 1, "TODO NOT WORKING");', (hash,))
+    c.execute('INSERT INTO users VALUES ("Test User 4", ?, 1, "TODO NOT WORKING");', (hash,))
     conn.commit()
     c.close()
     conn.close()
@@ -42,10 +42,10 @@ def add_dummy_interview_teams():
     conn = sqlite3.connect('interviews.db')
     c = conn.cursor()
     c.executescript(f'''
-        INSERT INTO user_teams VALUES ("test 1", "Test Team 1");
-        INSERT INTO user_teams VALUES ("test 2", "Test Team 2");
-        INSERT INTO user_teams VALUES ("test 3", "Test Team 3");
-        INSERT INTO user_teams VALUES ("test 4", "Test Team 4");
+        INSERT INTO user_teams VALUES ("Test User 1", "Test Team 1");
+        INSERT INTO user_teams VALUES ("Test User 2", "Test Team 2");
+        INSERT INTO user_teams VALUES ("Test User 3", "Test Team 3");
+        INSERT INTO user_teams VALUES ("Test User 4", "Test Team 4");
         ''')
     conn.commit()
     c.close()

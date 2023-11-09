@@ -1,7 +1,7 @@
 {% extends "main.html" %}
 
 {% block header %}
-<h1>{{ session["uname"] }}</h1>
+<h1>{{session["team_name"]}} ({{session["uname"] }})</h1>
 {% endblock %}
 
 {% block content %}

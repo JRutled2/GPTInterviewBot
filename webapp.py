@@ -1,6 +1,6 @@
 import sqlite3
 import bcrypt 
-from Chatbot import Bot
+from chatbot import Bot
 from flask import Flask, session, redirect
 from flask.globals import request
 from flask.helpers import url_for
@@ -24,6 +24,7 @@ def index():
         session['access'] = login_attempt[1]
         session['message_log'] = []
         app.config['bot'] = chatbot_setup(login_attempt[0], request.form['gptkey'])
+        session['team_name'] = app.config['bot'].team_name
         return redirect(url_for('user_chat'))
     return render_template('login.j2')
 
@@ -34,7 +35,6 @@ def user_chat():
     
     if 'uname' in session:
         if 'chat' in request.form:
-            print('GOOD')
             session['message_log'] = app.config['bot'].chat(request.form['chat'])
         else:
             session['message_log'] = app.config['bot'].chat('')
@@ -67,7 +67,6 @@ def chatbot_setup(username, gptkey):
     results = cur.execute('SELECT username FROM user_teams WHERE team_name = ?', (team_name,))
     team_members = []
     for i in results.fetchall():
-        print(i)
         team_members += [i[0]]
 
     bot = Bot(gptkey)
