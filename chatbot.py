@@ -1,5 +1,5 @@
 from openai import AsyncOpenAI
-import asynchio
+import asyncio
 
 class Bot():    
     """ Interview Bot Class
@@ -45,7 +45,7 @@ class Bot():
         """
         
         # Completion object that contains the output from GPT
-        completion = asynchio.run(self.client.chat.completions.create(model="gpt-3.5-turbo", messages=self.message_log))
+        completion = asyncio.run(self.client.chat.completions.create(model="gpt-3.5-turbo", messages=self.message_log))
         
         print(completion)
         # Adds GPT output to the message log
