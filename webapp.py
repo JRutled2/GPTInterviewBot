@@ -102,9 +102,17 @@ def create_team():
 
     return render_template('create_team.j2')
 
+@app.route('/manage/view_teams', methods=['GET', 'POST'])
+def view_teams():
+    # Checks the user's access
+    if not valid_access(2):
+        return redirect(url_for('index'))
+    
+    return render_template('view_teams.j2')
+
 def valid_access(access_level):
     # Ensures the user is logged in
-    if not all(x in ['uname', 'access'] for x in session.keys()):
+    if 'uname' not in session or 'access' not in session:
         return False
 
     # Ensures the user has proper access 
@@ -114,19 +122,27 @@ def valid_access(access_level):
     return True
 
 def login(uname, pword):
+    # Connects to the user database
     conn = sqlite3.connect('users.db')
     cur = conn.cursor()
 
+    # Gets user with username
     results = cur.execute('SELECT * FROM users WHERE username = ?', (uname,))
     results = results.fetchone()
 
+    # If no user is found, it returns None
     if results == None:
         return None
 
+    # Encodes entered password
     pword = pword.encode('utf-8')
+    
+    # Compares passwords, returns None if it is incorrect
     if not bcrypt.checkpw(pword, results[1]):
         return None
-    return results[0], results[2], results[3]
+    
+    # Returns user_id, username, access_level, and gpt_key
+    return (results[0], results[1], results[3], results[4])
 
 def chatbot_setup(username, gptkey):
     conn = sqlite3.connect('interviews.db')

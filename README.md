@@ -1,6 +1,6 @@
 # BuisnessInterviewBot
 
-# Installation and Usage:
+# Installation and Usage
 1. Download the Code.
 2. Run the following pip commands:
   - pip install --upgrade openai
@@ -14,3 +14,6 @@ https://platform.openai.com/api-keys
 
 # Management
 - Adding Teams:
+
+# Stored Chats
+Past chats are stored under the chats folder, in json format.  The files are named by their team id.

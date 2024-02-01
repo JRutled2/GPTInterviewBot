@@ -1,19 +1,25 @@
+DROP TABLE IF EXISTS teams;
+DROP TABLE IF EXISTS manager_teams;
 DROP TABLE IF EXISTS user_teams;
 DROP TABLE IF EXISTS weekly_chats;
 
+CREATE TABLE teams(
+	team_id TEXT PRIMARY KEY,
+	team_name TEXT,
+);
+
 CREATE TABLE manager_teams(
-	username TEXT PRIMARY KEY,
-	team_name TEXT
+	user_id TEXT,
+	team_id TEXT PRIMARY KEY
 );
 
 CREATE TABLE user_teams(
-	username TEXT PRIMARY KEY,
+	user_id TEXT PRIMARY KEY,
 	team_name TEXT
 );
 
 CREATE TABLE weekly_chats(
-	id TEXT PRIMARY KEY,
-	team_name TEXT NOT NULL,
-	chat_week TEXT NOT NULL,
-	interview TEXT
+	chat_id TEXT PRIMARY KEY,
+	team_id TEXT NOT NULL,
+	chat_date TEXT NOT NULL
 );
