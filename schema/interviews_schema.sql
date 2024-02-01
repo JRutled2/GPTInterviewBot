@@ -7,7 +7,7 @@ CREATE TABLE user_teams(
 );
 
 CREATE TABLE weekly_chats(
-	id INTEGER PRIMARY KEY,
+	id TEXT PRIMARY KEY,
 	team_name TEXT NOT NULL,
 	chat_week TEXT NOT NULL,
 	interview TEXT

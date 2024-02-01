@@ -1,4 +1,5 @@
-from openai import AsyncOpenAI
+import openai
+from openai import OpenAI
 import asyncio
 
 class Bot():    
@@ -31,7 +32,7 @@ class Bot():
         self.temp_members: list[str] = self.team_members
 
         # Sets the openai key
-        self.client = AsyncOpenAI(api_key=gpt_key)
+        self.client = OpenAI(api_key=gpt_key)
 
     def ask_gpt(self, ) -> None:
         """ Method that Generates a New Response From the GPT Model
@@ -45,7 +46,7 @@ class Bot():
         """
         
         # Completion object that contains the output from GPT
-        completion = asyncio.run(self.client.chat.completions.create(model="gpt-3.5-turbo", messages=self.message_log))
+        completion = self.client.chat.completions.create(model="gpt-3.5-turbo", messages=self.message_log)
         
         print(completion)
         # Adds GPT output to the message log

@@ -1,5 +1,6 @@
 import sqlite3
 import bcrypt 
+import uuid
 from chatbot import Bot
 from flask import Flask, session, redirect
 from flask.globals import request
@@ -36,6 +37,9 @@ def user_chat():
     if 'uname' in session:
         if 'chat' in request.form:
             session['message_log'] = app.config['bot'].chat(request.form['chat'])
+        elif 'finish' in request.form:
+            print_report()
+            return redirect(url_for('index'))
         else:
             session['message_log'] = app.config['bot'].chat('')
         return render_template('chat.j2', message_log=session['message_log'])
@@ -74,6 +78,28 @@ def chatbot_setup(username, gptkey):
     bot.temp_members = team_members
     bot.team_name = team_name
     return bot
+
+def save_chat():
+    conn = sqlite3.connect('interviews.db')
+    c = conn.cursor()
+    output = ''
+    for m in session['message_log']:
+        output += m['role']
+        output += ':\n'
+        output += m['content']
+        output += '\n'
+    uid = uuid.uuid4()
+    c.execute('INSERT INTO weekly_chats VALUES (?, ?, ?, ?)')
+    return
+
+def print_report():
+    output = ''
+    for m in session['message_log']:
+        output += m['role']
+        output += ':\n'
+        output += m['content']
+        output += '\n'
+    print(output)
 
 if __name__ == '__main__': 
     #app.run(host='0.0.0.0', port=12429)
