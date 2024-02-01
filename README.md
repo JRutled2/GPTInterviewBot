@@ -3,8 +3,8 @@
 # Installation and Usage:
 1. Download the Code.
 2. Run the following pip commands:
--pip install OpenAI
--pip install bcrypt
+  - pip install OpenAI
+  - pip install bcrypt
 4. Run webapp.py
 
 # webapp.py
