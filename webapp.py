@@ -62,8 +62,8 @@ def index():
 
 @app.route('/chat', methods=['GET', 'POST'])
 def user_chat():
-    # If User is not Logged in, it returns to the index page
-    if 'uname' not in session:
+    # Checks the user's access
+    if not valid_access(1):
         return redirect(url_for('index'))
 
     # This if else statment is used to generate the next response message
@@ -83,8 +83,8 @@ def user_chat():
 
 @app.route('/manage', methods=['GET', 'POST'])
 def manage():
-    # Ensures the user is logged in
-    if 'uname' not in session:
+    # Checks the user's access
+    if not valid_access(2):
         return redirect(url_for('index'))
 
     # Redirects to team creation page when button is clicked
@@ -96,7 +96,22 @@ def manage():
 
 @app.route('/manage/create_team', methods=['GET', 'POST'])
 def create_team():
+    # Checks the user's access
+    if not valid_access(2):
+        return redirect(url_for('index'))
+
     return render_template('create_team.j2')
+
+def valid_access(access_level):
+    # Ensures the user is logged in
+    if not all(x in ['uname', 'access'] for x in session.keys()):
+        return False
+
+    # Ensures the user has proper access 
+    if session['access'] < access_level:
+        return False
+
+    return True
 
 def login(uname, pword):
     conn = sqlite3.connect('users.db')
