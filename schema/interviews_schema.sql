@@ -1,6 +1,11 @@
 DROP TABLE IF EXISTS user_teams;
 DROP TABLE IF EXISTS weekly_chats;
 
+CREATE TABLE manager_teams(
+	username TEXT PRIMARY KEY,
+	team_name TEXT
+);
+
 CREATE TABLE user_teams(
 	username TEXT PRIMARY KEY,
 	team_name TEXT

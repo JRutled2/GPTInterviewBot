@@ -8,8 +8,9 @@ from flask.helpers import url_for
 from flask.templating import render_template
 
 app = Flask(__name__)
+
 # Since the secret key is randomly generated, each time the app is restarted all users will be logged ou
-# This increases security but decreases ease of use
+# This increases security but decreases ease of use.
 app.secret_key = str(uuid.uuid4())
 
 @app.route('/', methods=['GET', 'POST'])
@@ -29,17 +30,26 @@ def index():
         session['uname'] = login_attempt[0]
         session['access'] = login_attempt[1]
 
-        # Saves the ongoing message log
-        session['message_log'] = []
+        # Redirects to chat page for users
+        if session['access'] == 1:
+            # Saves the ongoing message log
+            session['message_log'] = []
 
-        # Saves the bot object
-        app.config['bot'] = chatbot_setup(login_attempt[0], request.form['gptkey'])
+            # Saves the bot object
+            app.config['bot'] = chatbot_setup(login_attempt[0], request.form['gptkey'])
 
-        # Saves the team name
-        session['team_name'] = app.config['bot'].team_name
+            # Saves the team name
+            session['team_name'] = app.config['bot'].team_name
 
-        # Reditects to chat page
-        return redirect(url_for('user_chat'))
+            return redirect(url_for('user_chat'))
+
+        # Redirects to mangagement page for admins
+        if session['access'] == 2:
+            return redirect(url_for('manage'))
+        
+        # Redirects to super management page for super admin
+        if session['access'] == 3:
+            return redirect(url_for('index'))
 
     # Sets any warning messages
     if 'warn' in session:
@@ -65,6 +75,10 @@ def user_chat():
         return render_template('chat.j2', message_log=session['message_log'])
     else:
         return redirect(url_for('index'))
+
+@app.route('/manage', methods=['GET', 'POST'])
+def manage():
+    return render_template('manage.j2')
 
 def login(uname, pword):
     conn = sqlite3.connect('users.db')

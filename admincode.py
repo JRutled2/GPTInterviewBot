@@ -19,6 +19,7 @@ def add_dummy_user():
 
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
+    c.execute('INSERT INTO users VALUES ("Test Super", ?, 3, "TODO NOT WORKING");', (hash,))
     c.execute('INSERT INTO users VALUES ("Test Admin", ?, 2, "TODO NOT WORKING");', (hash,))
     c.execute('INSERT INTO users VALUES ("Test User 1", ?, 1, "TODO NOT WORKING");', (hash,))
     c.execute('INSERT INTO users VALUES ("Test User 2", ?, 1, "TODO NOT WORKING");', (hash,))
@@ -42,6 +43,7 @@ def add_dummy_interview_teams():
     conn = sqlite3.connect('interviews.db')
     c = conn.cursor()
     c.executescript(f'''
+        INSERT INTO user_teams VALUES ("Test Admin", "Management Team");
         INSERT INTO user_teams VALUES ("Test User 1", "Test Team 1");
         INSERT INTO user_teams VALUES ("Test User 2", "Test Team 2");
         INSERT INTO user_teams VALUES ("Test User 3", "Test Team 3");

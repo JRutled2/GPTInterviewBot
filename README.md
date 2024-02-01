@@ -11,11 +11,15 @@
 # API Key
 API keys are found at the following link:__
 https://platform.openai.com/api-keys
-# webapp.py
-This is the main file used for the flask webapp.
 
-# admincode.py
-This is a development file used cureently for creating teams and students
+# Management
+	- Adding Teams:__
+		
 
-# chatbot.py
-This class stores and tracks the current chat, and interacts with the gpt API.
+# Files
+	- webapp.py:__
+		This is the main file used for the flask webapp.
+	- admincode.py:__
+		This is a development file used cureently for creating teams and students
+	- chatbot.py:__
+		This class stores and tracks the current chat, and interacts with the gpt API.
