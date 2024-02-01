@@ -14,20 +14,37 @@ app.secret_key = 'any random string'
 def index():
     # If user attempted to login
     if request.method == 'POST' and 'pword' in request.form:
+
         # Call the login function
         login_attempt = login(request.form['uname'], request.form['pword'])
-        # If login fails
+
+        # If login fails, redirects to homepage
         if login_attempt == None:
+            session['warn'] = 'Username or Password Invalid'
             return redirect(url_for('index'))
 
-        # If login Succeeds
+        # Saves the necessary user information
         session['uname'] = login_attempt[0]
         session['access'] = login_attempt[1]
+
+        # Saves the ongoing message log
         session['message_log'] = []
+
+        # Saves the bot object
         app.config['bot'] = chatbot_setup(login_attempt[0], request.form['gptkey'])
+
+        # Saves the team name
         session['team_name'] = app.config['bot'].team_name
+
+        # Reditects to chat page
         return redirect(url_for('user_chat'))
-    return render_template('login.j2')
+
+    if 'warn' in session:
+        warn = session['warn']
+        session.pop('warn')
+    else:
+        warn = None
+    return render_template('login.j2', warn=warn)
 
 @app.route('/chat', methods=['GET', 'POST'])
 def user_chat():

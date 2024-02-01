@@ -12,4 +12,7 @@
 	<input type="text" placeholder="GPT-key" name="gptkey" id="gptkey" size="46" required>
 	<button type="submit">Login</button>
 </form>
+{% if warn %}
+<p>{{warn}}</p>
+{% endif %}
 {% endblock %}
