@@ -9,9 +9,8 @@ from flask.templating import render_template
 
 app = Flask(__name__)
 
-# Since the secret key is randomly generated, each time the app is restarted all users will be logged ou
-# This increases security but decreases ease of use.
-app.secret_key = str(uuid.uuid4())
+# Secret Key is Randomly Generated
+app.secret_key = uuid.uuid4().hex
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -63,22 +62,41 @@ def index():
 
 @app.route('/chat', methods=['GET', 'POST'])
 def user_chat():
-    
-    if 'uname' in session:
-        if 'chat' in request.form:
-            session['message_log'] = app.config['bot'].chat(request.form['chat'])
-        elif 'finish' in request.form:
-            print_report()
-            return redirect(url_for('index'))
-        else:
-            session['message_log'] = app.config['bot'].chat('')
-        return render_template('chat.j2', message_log=session['message_log'])
-    else:
+    # If User is not Logged in, it returns to the index page
+    if 'uname' not in session:
         return redirect(url_for('index'))
+
+    # This if else statment is used to generate the next response message
+    # If statement for when the user is currently chatting
+    if 'chat' in request.form:
+        session['message_log'] = app.config['bot'].chat(request.form['chat'])
+    # If statement for when the user is finished chatting
+    elif 'finish' in request.form:
+        print_report()
+        return redirect(url_for('index'))
+    # Else statement for initial chat message, necessary for when the message log is empty
+    else:
+        session['message_log'] = app.config['bot'].chat('')
+
+    # Renders the chat page
+    return render_template('chat.j2', message_log=session['message_log'])
 
 @app.route('/manage', methods=['GET', 'POST'])
 def manage():
+    # Ensures the user is logged in
+    if 'uname' not in session:
+        return redirect(url_for('index'))
+
+    # Redirects to team creation page when button is clicked
+    if 'create_team' in request.form:
+        return redirect(url_for('create_team'))
+
+    # Renders management homepage
     return render_template('manage.j2')
+
+@app.route('/manage/create_team', methods=['GET', 'POST'])
+def create_team():
+    return render_template('create_team.j2')
 
 def login(uname, pword):
     conn = sqlite3.connect('users.db')
