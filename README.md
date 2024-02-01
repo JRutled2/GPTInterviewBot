@@ -8,6 +8,9 @@
   - pip install --upgrade flask
 4. Run webapp.py
 
+# API Key
+API keys are found at the following link:
+https://platform.openai.com/api-keys
 # webapp.py
 This is the main file used for the flask webapp.
 
