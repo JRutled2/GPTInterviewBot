@@ -13,4 +13,4 @@ API keys are found at the following link:
 https://platform.openai.com/api-keys
 
 # Management
-	- Adding Teams:
+- Adding Teams:
