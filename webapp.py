@@ -8,7 +8,9 @@ from flask.helpers import url_for
 from flask.templating import render_template
 
 app = Flask(__name__)
-app.secret_key = 'any random string'
+# Since the secret key is randomly generated, each time the app is restarted all users will be logged ou
+# This increases security but decreases ease of use
+app.secret_key = str(uuid.uuid4())
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -39,17 +41,18 @@ def index():
         # Reditects to chat page
         return redirect(url_for('user_chat'))
 
+    # Sets any warning messages
     if 'warn' in session:
         warn = session['warn']
         session.pop('warn')
     else:
         warn = None
+
+    # Renders the page
     return render_template('login.j2', warn=warn)
 
 @app.route('/chat', methods=['GET', 'POST'])
 def user_chat():
-    #if request.method == 'GET':
-    #    return redirect(url_for('index'))
     
     if 'uname' in session:
         if 'chat' in request.form:
