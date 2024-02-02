@@ -1,23 +1,19 @@
 {% extends "main.html" %}
 
-{% block header %}
-<h1>{{session["team_name"]}} ({{session["uname"] }})</h1>
-{% endblock %}
-
 {% block content %}
-{% for i in message_log %}
-	{% if i['role'] == 'assistant' %}
-	<p align="left" font-size="24">{{i['content']}}</p>
-	{% elif i['role'] == 'user'%}
-	<p align="right" font-size="24">{{i['content']}}</p>
-	{% endif %}
-{% endfor %}
-<form action="{{url_for('user_chat')}}" method="POST">
-	<textarea id="chat" name="chat" rows="4" cols="50"></textarea>
-	<button type="submit">Send</button>
-</form>
-<form action="{{url_for('user_chat')}}" method="POST">
-	<input type="hidden" name="finish">
-	<button type="submit">Finish</button>
-</form>
+	{% for i in message_log %}
+			{% if i['role'] == 'assistant' %}
+				<p align="left" font-size="24">{{i['content']}}</p>
+			{% elif i['role'] == 'user'%}
+				<p align="right" font-size="24">{{i['content']}}</p>
+			{% endif %}
+	{% endfor %}
+	<form action="{{url_for('user_chat')}}" method="POST">
+		<textarea id="chat" name="chat" rows="4" cols="50"></textarea>
+		<button type="submit">Send</button>
+	</form>
+	<form action="{{url_for('user_chat')}}" method="POST">
+		<input type="hidden" name="finish">
+		<button type="submit">Finish</button>
+	</form>
 {% endblock %}

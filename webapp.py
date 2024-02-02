@@ -98,7 +98,7 @@ def user_chat():
     # If statement for when the user is finished chatting
     elif 'finish' in request.form:
         save_chat()
-        return redirect(url_for('index'))
+        return redirect(url_for('logout'))
     # Else statement for initial chat message, necessary for when the message log is empty
     else:
         session['message_log'] = app.config['bot'].chat('')
@@ -332,6 +332,14 @@ def save_chat():
             f.write(j)
 
 # --------Needs Updating----------
+
+@app.route('/logout', methods=['GET', 'POST'])
+def logout():
+    session.clear()
+    if 'pop' in app.config:
+        app.config.pop('bot')
+    
+    return redirect(url_for('index'))
 
 def chatbot_setup(username, gptkey):
     bot = Bot(gptkey)

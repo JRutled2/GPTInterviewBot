@@ -4,10 +4,19 @@
         <link rel="stylesheet" href="{{ url_for('static', filename='main_styles.css')}}"">
     </head>
     <body>
+        {% block header %}
         <div class="topnav">
-            {% block header %}
-            {% endblock %}
+            <a href="{{url_for('logout')}}" class="navright">Logout</a>
+            {% if session['access'] > 1 %}
+                <a href="{{url_for('index')}}">Home</a>
+                <a href="#">Teams</a>
+                <a href="#">Users</a>
+            {% endif %}
+            {% if session['access'] > 2 %}
+                <a href="#">Managers</a>
+            {% endif %}
         </div>
+        {% endblock %}
 
         <div class="flex-body">
             {% block content %}
