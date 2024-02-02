@@ -1,0 +1,1 @@
+# Chat Logs are stored here in json format
