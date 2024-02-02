@@ -30,5 +30,6 @@ CREATE TABLE user_teams(
 CREATE TABLE weekly_chats(
 	chat_id TEXT PRIMARY KEY,
 	team_id TEXT NOT NULL,
-	chat_date TEXT NOT NULL
+	chat_date TEXT NOT NULL,
+	chat_time FLOAT NOT NULL
 );

@@ -122,6 +122,10 @@ def manage():
     if 'create_user' in request.form:
         return redirect(url_for('create_user'))
 
+    # Redirects to team creation page when button is clicked
+    if 'view_users' in request.form:
+        return redirect(url_for('view_users'))
+
     # Renders management homepage
     return render_template('manage.j2')
 
@@ -161,6 +165,7 @@ def create_user():
             cur.execute('INSERT INTO users (user_id, username, password, access) VALUES (?,?,?,?)', (user_id, request.form['username'], 
                                                                request.form['password'], 1))
             cur.execute('INSERT INTO user_teams VALUES (?,?)', (user_id, request.form['team_id']))
+
             # Commits the insert
             conn.commit()
             cur.close()
@@ -210,6 +215,12 @@ def view_users():
     # Connects to the database
     conn = sqlite3.connect('users.db')
     cur = conn.cursor()
+
+    # Grabs all the users associated with the manager
+    results = cur.execute('SELECT * FROM (manager_teams JOIN user_teams USING (team_id)) JOIN users ON user_teams.user_id = users.user_id WHERE manager_teams.user_id = ?', 
+                          (session['userid']))
+    results = results.fetchall()
+    return results
 
 @app.route('/manage/view_teams', methods=['GET', 'POST'])
 def view_teams():
