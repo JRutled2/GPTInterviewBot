@@ -19,8 +19,8 @@ def add_dummy_user():
 
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
-    c.execute('INSERT INTO users VALUES ("1", "Test Super", ?, 3, "TODO NOT WORKING");', (hash,))
-    c.execute('INSERT INTO users VALUES ("2","Test Admin", ?, 2, "TODO NOT WORKING");', (hash,))
+    c.execute('INSERT INTO users VALUES ("1", "Test Admin", ?, 3, "TODO NOT WORKING");', (hash,))
+    c.execute('INSERT INTO users VALUES ("2","Test Manage", ?, 2, "TODO NOT WORKING");', (hash,))
     c.execute('INSERT INTO users VALUES ("3","Test User 1", ?, 1, "TODO NOT WORKING");', (hash,))
     c.execute('INSERT INTO users VALUES ("4","Test User 2", ?, 1, "TODO NOT WORKING");', (hash,))
     c.execute('INSERT INTO users VALUES ("5","Test User 3", ?, 1, "TODO NOT WORKING");', (hash,))

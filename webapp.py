@@ -43,7 +43,7 @@ def index():
             cur = conn.cursor()
 
             # Gets the user's team id and name
-            results = cur.execute('SELECT team_id, team_name FROM user_teams JOIN teams USING (team_id) WHERE user_id = ?', (session['userid'],))
+            results = cur.execute('SELECT team_name, team_id FROM user_teams JOIN teams USING (team_id) WHERE user_id = ?', (session['userid'],))
             results = results.fetchone()
             
             # Closes the database conncetion
@@ -65,13 +65,13 @@ def index():
 
             return redirect(url_for('user_chat'))
 
-        # Redirects to mangagement page for admins
+        # Redirects to mangagement page for managers
         if session['access'] == 2:
             return redirect(url_for('manage'))
         
-        # Redirects to super management page for super admin
+        # Redirects to super management page for admins
         if session['access'] == 3:
-            return redirect(url_for('index'))
+            return redirect(url_for('admin'))
 
     # Sets any warning messages
     if 'warn' in session:
@@ -121,6 +121,23 @@ def manage():
     # Renders management homepage
     return render_template('manage.j2')
 
+@app.route('/admin', methods=['GET', 'POST'])
+def admin():
+    # Checks the user's access
+    if not valid_access(3):
+        return redirect(url_for('index'))
+
+    # Redirects to team creation page when button is clicked
+    if 'create_team' in request.form:
+        return redirect(url_for('create_team'))
+
+    # Redirects to team view page when button is clicked
+    if 'view_teams' in request.form:
+        return redirect(url_for('view_teams'))
+
+    # Renders management homepage
+    return render_template('admin.j2')
+
 @app.route('/manage/create_team', methods=['GET', 'POST'])
 def create_team():
     # Checks the user's access
@@ -135,6 +152,12 @@ def create_team():
             
             # Generates a team id
             team_id = gen_team_id()
+
+            # Ensures the team id is unique
+            valid = cur.execute('SELECT * FROM teams WHERE team_id = ?', (team_id,)).fetchone()
+            while valid != None:
+                team_id = gen_team_id()
+                valid = cur.execute('SELECT * FROM teams WHERE team_id = ?', (team_id,)).fetchone()
 
             # Adds team to the database
             cur.execute('INSERT INTO teams VALUES (?, ?);', (team_id, request.form['team_name']))
@@ -212,15 +235,6 @@ def login(uname, pword):
     # Returns user_id, username, access_level, gpt_key, team_id, and team_name
     return (results[0], results[1], results[3], results[4])
 
-# --------Needs Updating----------
-
-def chatbot_setup(username, gptkey):
-    bot = Bot(gptkey)
-    bot.team_members = [username]
-    bot.temp_members = [username]
-    bot.team_name = session['team_name']
-    return bot
-
 def save_chat():        
     # Creates chat folder if it doesn't exist  
     if not os.path.exists(os.path.join('chats', f'{session["team_id"]}.json')):
@@ -252,14 +266,14 @@ def save_chat():
     with open(os.path.join('chats', f'{session["team_id"]}.json'), 'w') as f:
             f.write(j)
 
-def print_report():
-    output = ''
-    for m in session['message_log']:
-        output += m['role']
-        output += ':\n'
-        output += m['content']
-        output += '\n'
-    print(output)
+# --------Needs Updating----------
+
+def chatbot_setup(username, gptkey):
+    bot = Bot(gptkey)
+    bot.team_members = [username]
+    bot.temp_members = [username]
+    bot.team_name = session['team_name']
+    return bot
 
 if __name__ == '__main__': 
     #app.run(host='0.0.0.0', port=12429)
