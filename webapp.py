@@ -38,8 +38,8 @@ def index():
         # Redirects to chat page for users
         if session['access'] == 1:
             
-            # Connects to the interviews database
-            conn = sqlite3.connect('interviews.db')
+            # Connects to the database
+            conn = sqlite3.connect('users.db')
             cur = conn.cursor()
 
             # Gets the user's team id and name
@@ -58,7 +58,7 @@ def index():
             session['message_log'] = []
 
             # Stores the bot object
-            app.config['bot'] = chatbot_setup(session['uname'], request.form['gptkey'])
+            app.config['bot'] = chatbot_setup(session['uname'], 'TODO GRAB GPT KEY')
 
             # Stores the team name
             session['team_name'] = app.config['bot'].team_name
@@ -118,6 +118,10 @@ def manage():
     if 'view_teams' in request.form:
         return redirect(url_for('view_teams'))
 
+    # Redirects to team creation page when button is clicked
+    if 'create_user' in request.form:
+        return redirect(url_for('create_user'))
+
     # Renders management homepage
     return render_template('manage.j2')
 
@@ -138,6 +142,32 @@ def admin():
     # Renders management homepage
     return render_template('admin.j2')
 
+@app.route('/manage/create_user', methods=['GET', 'POST'])
+def create_user():
+    # Checks the user's access
+    if not valid_access(2):
+        return redirect(url_for('index'))
+
+    if request.method == 'POST':
+        if 'username' in request.form:
+            # Connects to the user database
+            conn = sqlite3.connect('users.db')
+            cur = conn.cursor()
+
+            # Generates a unique user id
+            user_id = uuid.uuid4().hex
+
+            # Adds the user to the login database
+            cur.execute('INSERT INTO users (user_id, username, password, access) VALUES (?,?,?,?)', (user_id, request.form['username'], 
+                                                               request.form['password'], 1))
+            cur.execute('INSERT INTO user_teams VALUES (?,?)', (user_id, request.form['team_id']))
+            # Commits the insert
+            conn.commit()
+            cur.close()
+            conn.close()
+
+    return render_template('create_user.j2')
+
 @app.route('/manage/create_team', methods=['GET', 'POST'])
 def create_team():
     # Checks the user's access
@@ -147,7 +177,7 @@ def create_team():
     if request.method == 'POST':
         if 'team_name' in request.form:
             # Connects to the database
-            conn = sqlite3.connect('interviews.db')
+            conn = sqlite3.connect('users.db')
             cur = conn.cursor()
             
             # Generates a team id
@@ -171,19 +201,31 @@ def create_team():
         return redirect(url_for('manage'))
     return render_template('create_team.j2')
 
+@app.route('/manage/view_users', methods=['GET', 'POST'])
+def view_users():
+    # Checks the user's access
+    if not valid_access(2):
+        return redirect(url_for('index'))
+
+    # Connects to the database
+    conn = sqlite3.connect('users.db')
+    cur = conn.cursor()
+
 @app.route('/manage/view_teams', methods=['GET', 'POST'])
 def view_teams():
     # Checks the user's access
     if not valid_access(2):
         return redirect(url_for('index'))
     
-    conn = sqlite3.connect('interviews.db')
+    # Connects to the database
+    conn = sqlite3.connect('users.db')
     cur = conn.cursor()
     
+    # Grabs all the teams associated with the manager
     results = cur.execute('SELECT team_id, team_name FROM manager_teams JOIN teams USING (team_id) WHERE user_id = ?', (session['userid'],))
-    
     results = results.fetchall()
     
+    # Renders the view teams page
     return render_template('view_teams.j2', teams=results)
 
 def valid_access(access_level):
