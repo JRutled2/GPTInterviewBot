@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html>
+    <head>
+        <link rel="stylesheet" href="{{ url_for('static', filename='main_styles.css')}}"">
+    </head>
     <body>
-        <div id="header">
+        <div class="topnav">
             {% block header %}
-            ;)
             {% endblock %}
         </div>
-        <div id="content">
+
+        <div class="flex-body">
             {% block content %}
             ;)
             {% endblock %}
-        </div>
-        <div id="foot">
-
         </div>
     </body>
 </html>
