@@ -1,9 +1,12 @@
-from re import T
+import os
 import sqlite3
 import bcrypt 
 import uuid
+import json
+import time
 from chatbot import Bot
 from random import choice
+from datetime import date
 from flask import Flask, session, redirect
 from flask.globals import request
 from flask.helpers import url_for
@@ -27,20 +30,37 @@ def index():
             session['warn'] = 'Username or Password Invalid'
             return redirect(url_for('index'))
 
-        # Saves the necessary user information
+        # Stores the necessary user data
         session['userid'] = login_attempt[0]
         session['uname'] = login_attempt[1]
         session['access'] = login_attempt[2]
 
         # Redirects to chat page for users
         if session['access'] == 1:
-            # Saves the ongoing message log
+            
+            # Connects to the interviews database
+            conn = sqlite3.connect('interviews.db')
+            cur = conn.cursor()
+
+            # Gets the user's team id and name
+            results = cur.execute('SELECT team_id, team_name FROM user_teams JOIN teams USING (team_id) WHERE user_id = ?', (session['userid'],))
+            results = results.fetchone()
+            
+            # Closes the database conncetion
+            cur.close()
+            conn.close()
+            
+            # Stores the user's team data
+            session['team_name'] = results[0]
+            session['team_id'] = results[1]
+
+            # Stores the ongoing message log    
             session['message_log'] = []
 
-            # Saves the bot object
-            app.config['bot'] = chatbot_setup(login_attempt[0], request.form['gptkey'])
+            # Stores the bot object
+            app.config['bot'] = chatbot_setup(session['uname'], request.form['gptkey'])
 
-            # Saves the team name
+            # Stores the team name
             session['team_name'] = app.config['bot'].team_name
 
             return redirect(url_for('user_chat'))
@@ -75,7 +95,7 @@ def user_chat():
         session['message_log'] = app.config['bot'].chat(request.form['chat'])
     # If statement for when the user is finished chatting
     elif 'finish' in request.form:
-        print_report()
+        save_chat()
         return redirect(url_for('index'))
     # Else statement for initial chat message, necessary for when the message log is empty
     else:
@@ -175,6 +195,9 @@ def login(uname, pword):
     results = cur.execute('SELECT * FROM users WHERE username = ?', (uname,))
     results = results.fetchone()
 
+    # Closes the database connection
+    cur.close()
+    conn.close()
     # If no user is found, it returns None
     if results == None:
         return None
@@ -185,42 +208,49 @@ def login(uname, pword):
     # Compares passwords, returns None if it is incorrect
     if not bcrypt.checkpw(pword, results[2]):
         return None
-    
-    # Returns user_id, username, access_level, and gpt_key
+     
+    # Returns user_id, username, access_level, gpt_key, team_id, and team_name
     return (results[0], results[1], results[3], results[4])
 
 # --------Needs Updating----------
 
 def chatbot_setup(username, gptkey):
-    conn = sqlite3.connect('interviews.db')
-    cur = conn.cursor()
-
-    results = cur.execute('SELECT * FROM user_teams WHERE username = ?', (username,))
-    team_name = results.fetchone()[1]
-
-    results = cur.execute('SELECT username FROM user_teams WHERE team_name = ?', (team_name,))
-    team_members = []
-    for i in results.fetchall():
-        team_members += [i[0]]
-
     bot = Bot(gptkey)
-    bot.team_members = team_members
-    bot.temp_members = team_members
-    bot.team_name = team_name
+    bot.team_members = [username]
+    bot.temp_members = [username]
+    bot.team_name = session['team_name']
     return bot
 
-def save_chat():
-    conn = sqlite3.connect('interviews.db')
-    c = conn.cursor()
-    output = ''
-    for m in session['message_log']:
-        output += m['role']
-        output += ':\n'
-        output += m['content']
-        output += '\n'
-    uid = uuid.uuid4()
-    c.execute('INSERT INTO weekly_chats VALUES (?, ?, ?, ?)')
-    return
+def save_chat():        
+    # Creates chat folder if it doesn't exist  
+    if not os.path.exists(os.path.join('chats', f'{session["team_id"]}.json')):
+        # Creates initial json dictionary
+        js = {'team_id': session['team_id'],
+              'team_name': session['team_name'],
+              'chats': {}}
+        
+        # Dumps it into json format
+        j = json.dumps(js, indent=2)
+            
+        # Saves initial file
+        with open(os.path.join('chats', f'{session["team_id"]}.json'), 'w') as f:
+            f.write(j)
+     
+    # Opens json file
+    with open(os.path.join('chats', f'{session["team_id"]}.json'), 'r') as f:
+        # Loads data
+        js = json.load(f)
+        
+    print(js)
+    # Saves the message log
+    js['chats'][f'{date.today()}: {time.time()}'] = session['message_log']
+        
+    # Dumps it into json format
+    j = json.dumps(js, indent=2)
+        
+    # Writes to the json file
+    with open(os.path.join('chats', f'{session["team_id"]}.json'), 'w') as f:
+            f.write(j)
 
 def print_report():
     output = ''

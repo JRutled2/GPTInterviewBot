@@ -5,5 +5,7 @@
 {% endblock %}
 
 {% block content %}
-<p>{{teams}}</p>
+{% for i in teams %}
+    <p>{{i[1]}}: {{i[0]}}</p>
+{% endfor %}
 {% endblock %}

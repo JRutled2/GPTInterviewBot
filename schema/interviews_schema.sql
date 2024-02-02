@@ -15,7 +15,7 @@ CREATE TABLE manager_teams(
 
 CREATE TABLE user_teams(
 	user_id TEXT PRIMARY KEY,
-	team_name TEXT
+	team_id TEXT
 );
 
 CREATE TABLE weekly_chats(

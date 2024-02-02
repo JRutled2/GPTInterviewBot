@@ -44,6 +44,8 @@ def add_dummy_interview_teams():
     c = conn.cursor()
     c.executescript(f'''
         INSERT INTO user_teams VALUES ("2", "Management Team");
+        INSERT INTO user_teams VALUES ("3", "23");       
+        INSERT INTO teams VALUES ("23", "Test Team 1");
         ''')
     conn.commit()
     c.close()
