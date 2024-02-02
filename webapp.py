@@ -94,6 +94,10 @@ def manage():
     if 'create_team' in request.form:
         return redirect(url_for('create_team'))
 
+    # Redirects to team view page when button is clicked
+    if 'view_teams' in request.form:
+        return redirect(url_for('view_teams'))
+
     # Renders management homepage
     return render_template('manage.j2')
 
@@ -130,7 +134,14 @@ def view_teams():
     if not valid_access(2):
         return redirect(url_for('index'))
     
-    return render_template('view_teams.j2')
+    conn = sqlite3.connect('interviews.db')
+    cur = conn.cursor()
+    
+    results = cur.execute('SELECT team_id, team_name FROM manager_teams JOIN teams USING (team_id) WHERE user_id = ?', (session['userid'],))
+    
+    results = results.fetchall()
+    
+    return render_template('view_teams.j2', teams=results)
 
 def valid_access(access_level):
     # Ensures the user is logged in
@@ -142,7 +153,6 @@ def valid_access(access_level):
         return False
 
     return True
-
 
 def gen_team_id():
     # Character options
@@ -178,6 +188,8 @@ def login(uname, pword):
     
     # Returns user_id, username, access_level, and gpt_key
     return (results[0], results[1], results[3], results[4])
+
+# --------Needs Updating----------
 
 def chatbot_setup(username, gptkey):
     conn = sqlite3.connect('interviews.db')
