@@ -1,7 +1,9 @@
+from re import T
 import sqlite3
 import bcrypt 
 import uuid
 from chatbot import Bot
+from random import choice
 from flask import Flask, session, redirect
 from flask.globals import request
 from flask.helpers import url_for
@@ -26,8 +28,9 @@ def index():
             return redirect(url_for('index'))
 
         # Saves the necessary user information
-        session['uname'] = login_attempt[0]
-        session['access'] = login_attempt[1]
+        session['userid'] = login_attempt[0]
+        session['uname'] = login_attempt[1]
+        session['access'] = login_attempt[2]
 
         # Redirects to chat page for users
         if session['access'] == 1:
@@ -100,6 +103,25 @@ def create_team():
     if not valid_access(2):
         return redirect(url_for('index'))
 
+    if request.method == 'POST':
+        if 'team_name' in request.form:
+            # Connects to the database
+            conn = sqlite3.connect('interviews.db')
+            cur = conn.cursor()
+            
+            # Generates a team id
+            team_id = gen_team_id()
+
+            # Adds team to the database
+            cur.execute('INSERT INTO teams VALUES (?, ?);', (team_id, request.form['team_name']))
+            cur.execute('INSERT INTO manager_teams VALUES (?, ?);', (session['userid'], team_id))
+            conn.commit()
+            
+            # Closes connection
+            cur.close()
+            conn.close()
+            
+        return redirect(url_for('manage'))
     return render_template('create_team.j2')
 
 @app.route('/manage/view_teams', methods=['GET', 'POST'])
@@ -121,6 +143,19 @@ def valid_access(access_level):
 
     return True
 
+
+def gen_team_id():
+    # Character options
+    symbs = 'ABCDEFGHIJKLMNPQRSTUVWXYZ123456789'
+    
+    # Generates string of 5 characters
+    team_id = ''
+    for _ in range(5):
+        team_id += choice(symbs)
+        
+    # Returns string
+    return team_id
+
 def login(uname, pword):
     # Connects to the user database
     conn = sqlite3.connect('users.db')
@@ -138,7 +173,7 @@ def login(uname, pword):
     pword = pword.encode('utf-8')
     
     # Compares passwords, returns None if it is incorrect
-    if not bcrypt.checkpw(pword, results[1]):
+    if not bcrypt.checkpw(pword, results[2]):
         return None
     
     # Returns user_id, username, access_level, and gpt_key

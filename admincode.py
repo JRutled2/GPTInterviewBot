@@ -19,12 +19,12 @@ def add_dummy_user():
 
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
-    c.execute('INSERT INTO users VALUES ("Test Super", ?, 3, "TODO NOT WORKING");', (hash,))
-    c.execute('INSERT INTO users VALUES ("Test Admin", ?, 2, "TODO NOT WORKING");', (hash,))
-    c.execute('INSERT INTO users VALUES ("Test User 1", ?, 1, "TODO NOT WORKING");', (hash,))
-    c.execute('INSERT INTO users VALUES ("Test User 2", ?, 1, "TODO NOT WORKING");', (hash,))
-    c.execute('INSERT INTO users VALUES ("Test User 3", ?, 1, "TODO NOT WORKING");', (hash,))
-    c.execute('INSERT INTO users VALUES ("Test User 4", ?, 1, "TODO NOT WORKING");', (hash,))
+    c.execute('INSERT INTO users VALUES ("1", "Test Super", ?, 3, "TODO NOT WORKING");', (hash,))
+    c.execute('INSERT INTO users VALUES ("2","Test Admin", ?, 2, "TODO NOT WORKING");', (hash,))
+    c.execute('INSERT INTO users VALUES ("3","Test User 1", ?, 1, "TODO NOT WORKING");', (hash,))
+    c.execute('INSERT INTO users VALUES ("4","Test User 2", ?, 1, "TODO NOT WORKING");', (hash,))
+    c.execute('INSERT INTO users VALUES ("5","Test User 3", ?, 1, "TODO NOT WORKING");', (hash,))
+    c.execute('INSERT INTO users VALUES ("6","Test User 4", ?, 1, "TODO NOT WORKING");', (hash,))
     conn.commit()
     c.close()
     conn.close()
@@ -43,11 +43,7 @@ def add_dummy_interview_teams():
     conn = sqlite3.connect('interviews.db')
     c = conn.cursor()
     c.executescript(f'''
-        INSERT INTO user_teams VALUES ("Test Admin", "Management Team");
-        INSERT INTO user_teams VALUES ("Test User 1", "Test Team 1");
-        INSERT INTO user_teams VALUES ("Test User 2", "Test Team 2");
-        INSERT INTO user_teams VALUES ("Test User 3", "Test Team 3");
-        INSERT INTO user_teams VALUES ("Test User 4", "Test Team 4");
+        INSERT INTO user_teams VALUES ("2", "Management Team");
         ''')
     conn.commit()
     c.close()

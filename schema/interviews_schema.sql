@@ -5,7 +5,7 @@ DROP TABLE IF EXISTS weekly_chats;
 
 CREATE TABLE teams(
 	team_id TEXT PRIMARY KEY,
-	team_name TEXT,
+	team_name TEXT
 );
 
 CREATE TABLE manager_teams(
