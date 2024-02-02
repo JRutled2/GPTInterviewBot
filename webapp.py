@@ -35,53 +35,55 @@ def index():
         session['uname'] = login_attempt[1]
         session['access'] = login_attempt[2]
 
-        # Redirects to chat page for users
-        if session['access'] == 1:
-            
-            # Connects to the database
-            conn = sqlite3.connect('users.db')
-            cur = conn.cursor()
+    # If user is not logged in
+    if 'access' not in session:
+        # Sets any warning messages
+        if 'warn' in session:
+            warn = session['warn']
+            session.pop('warn')
+        else:
+            warn = None
 
-            # Gets the user's team id and name
-            results = cur.execute('SELECT team_name, team_id FROM user_teams JOIN teams USING (team_id) WHERE user_id = ?', (session['userid'],))
-            results = results.fetchone()
-            
-            # Closes the database conncetion
-            cur.close()
-            conn.close()
-            
-            # Stores the user's team data
-            session['team_name'] = results[0]
-            session['team_id'] = results[1]
-
-            # Stores the ongoing message log    
-            session['message_log'] = []
-
-            # Stores the bot object
-            app.config['bot'] = chatbot_setup(session['uname'], 'TODO GRAB GPT KEY')
-
-            # Stores the team name
-            session['team_name'] = app.config['bot'].team_name
-
-            return redirect(url_for('user_chat'))
-
-        # Redirects to mangagement page for managers
-        if session['access'] == 2:
-            return redirect(url_for('manage'))
+        # Renders the page
+        return render_template('login.j2', warn=warn)
         
-        # Redirects to super management page for admins
-        if session['access'] == 3:
-            return redirect(url_for('admin'))
+    # Redirects to chat page for users
+    if session['access'] == 1:
+            
+        # Connects to the database
+        conn = sqlite3.connect('users.db')
+        cur = conn.cursor()
 
-    # Sets any warning messages
-    if 'warn' in session:
-        warn = session['warn']
-        session.pop('warn')
-    else:
-        warn = None
+        # Gets the user's team id and name
+        results = cur.execute('SELECT team_name, team_id FROM user_teams JOIN teams USING (team_id) WHERE user_id = ?', (session['userid'],))
+        results = results.fetchone()
+            
+        # Closes the database conncetion
+        cur.close()
+        conn.close()
+            
+        # Stores the user's team data
+        session['team_name'] = results[0]
+        session['team_id'] = results[1]
 
-    # Renders the page
-    return render_template('login.j2', warn=warn)
+        # Stores the ongoing message log    
+        session['message_log'] = []
+
+        # Stores the bot object
+        app.config['bot'] = chatbot_setup(session['uname'], 'TODO GRAB GPT KEY')
+
+        # Stores the team name
+        session['team_name'] = app.config['bot'].team_name
+
+        return redirect(url_for('user_chat'))
+
+    # Redirects to mangagement page for managers
+    if session['access'] == 2:
+        return redirect(url_for('manage'))
+        
+    # Redirects to super management page for admins
+    if session['access'] == 3:
+        return redirect(url_for('admin'))
 
 @app.route('/chat', methods=['GET', 'POST'])
 def user_chat():
@@ -146,32 +148,22 @@ def admin():
     # Renders management homepage
     return render_template('admin.j2')
 
-@app.route('/manage/create_user', methods=['GET', 'POST'])
-def create_user():
+@app.route('/manage/view_teams', methods=['GET', 'POST'])
+def view_teams():
     # Checks the user's access
     if not valid_access(2):
         return redirect(url_for('index'))
-
-    if request.method == 'POST':
-        if 'username' in request.form:
-            # Connects to the user database
-            conn = sqlite3.connect('users.db')
-            cur = conn.cursor()
-
-            # Generates a unique user id
-            user_id = uuid.uuid4().hex
-
-            # Adds the user to the login database
-            cur.execute('INSERT INTO users (user_id, username, password, access) VALUES (?,?,?,?)', (user_id, request.form['username'], 
-                                                               request.form['password'], 1))
-            cur.execute('INSERT INTO user_teams VALUES (?,?)', (user_id, request.form['team_id']))
-
-            # Commits the insert
-            conn.commit()
-            cur.close()
-            conn.close()
-
-    return render_template('create_user.j2')
+    
+    # Connects to the database
+    conn = sqlite3.connect('users.db')
+    cur = conn.cursor()
+    
+    # Grabs all the teams associated with the manager
+    results = cur.execute('SELECT team_id, team_name FROM manager_teams JOIN teams USING (team_id) WHERE user_id = ?', (session['userid'],))
+    results = results.fetchall()
+    
+    # Renders the view teams page
+    return render_template('view_teams.j2', teams=results)
 
 @app.route('/manage/create_team', methods=['GET', 'POST'])
 def create_team():
@@ -217,27 +209,47 @@ def view_users():
     cur = conn.cursor()
 
     # Grabs all the users associated with the manager
-    results = cur.execute('SELECT * FROM (manager_teams JOIN user_teams USING (team_id)) JOIN users ON user_teams.user_id = users.user_id WHERE manager_teams.user_id = ?', 
+    results = cur.execute('SELECT users.username, user_teams.team_id FROM (manager_teams JOIN user_teams USING (team_id)) JOIN users ON user_teams.user_id = users.user_id WHERE manager_teams.user_id = ?', 
                           (session['userid']))
     results = results.fetchall()
     return results
 
-@app.route('/manage/view_teams', methods=['GET', 'POST'])
-def view_teams():
+@app.route('/manage/create_user', methods=['GET', 'POST'])
+def create_user():
     # Checks the user's access
     if not valid_access(2):
         return redirect(url_for('index'))
-    
-    # Connects to the database
-    conn = sqlite3.connect('users.db')
-    cur = conn.cursor()
-    
-    # Grabs all the teams associated with the manager
-    results = cur.execute('SELECT team_id, team_name FROM manager_teams JOIN teams USING (team_id) WHERE user_id = ?', (session['userid'],))
-    results = results.fetchall()
-    
-    # Renders the view teams page
-    return render_template('view_teams.j2', teams=results)
+
+    if request.method == 'POST':
+        if 'username' in request.form:
+            # Connects to the user database
+            conn = sqlite3.connect('users.db')
+            cur = conn.cursor()
+
+            # Generates a unique user id
+            user_id = uuid.uuid4().hex
+            
+            # Hashes the password
+            bytes = request.form['password'].encode('utf-8') 
+            salt = bcrypt.gensalt() 
+            hash = bcrypt.hashpw(bytes, salt)
+
+            # Adds the user to the login database
+            cur.execute('INSERT INTO users (user_id, username, password, access) VALUES (?,?,?,?)', (user_id, request.form['username'], hash, 1))
+            cur.execute('INSERT INTO user_teams VALUES (?,?)', (user_id, request.form['team_id']))
+
+            # Commits the insert
+            conn.commit()
+            cur.close()
+            conn.close()
+
+    return render_template('create_user.j2')
+
+@app.route('/admin/create_manager', methods=['GET', 'POST'])
+def create_manager():
+    # Checks the user's access
+    if not valid_access(3):
+        return redirect(url_for('index'))
 
 def valid_access(access_level):
     # Ensures the user is logged in

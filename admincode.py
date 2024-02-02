@@ -4,7 +4,7 @@ import bcrypt
 def create_user_DB():
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
-    f = open('schema/user_schema.sql','r').read()
+    f = open('database_schema.sql','r').read()
     c.executescript(f)
     conn.commit()
     c.close()
