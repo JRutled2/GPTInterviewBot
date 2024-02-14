@@ -6,14 +6,16 @@
     <body>
         {% block header %}
         <div class="topnav">
+
             <a href="{{url_for('logout')}}" class="navright">Logout</a>
+            <a href="#" class="navright">More</a>
             {% if session['access'] > 1 %}
-                <a href="{{url_for('index')}}">Home</a>
-                <a href="#">Teams</a>
-                <a href="#">Users</a>
+            <a href="{{url_for('index')}}">Home</a>
+            <a href="{{url_for('view_teams')}}">Teams</a>
+            <a href="{{url_for('view_users')}}">Users</a>
             {% endif %}
             {% if session['access'] > 2 %}
-                <a href="#">Managers</a>
+            <a href="#">Managers</a>
             {% endif %}
         </div>
         {% endblock %}

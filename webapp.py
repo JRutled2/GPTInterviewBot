@@ -336,7 +336,7 @@ def save_chat():
 @app.route('/logout', methods=['GET', 'POST'])
 def logout():
     session.clear()
-    if 'pop' in app.config:
+    if 'bot' in app.config:
         app.config.pop('bot')
     
     return redirect(url_for('index'))
