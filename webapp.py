@@ -19,62 +19,13 @@ app.secret_key = uuid.uuid4().hex
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    # If user attempted to login
-    if request.method == 'POST' and 'pword' in request.form:
-
-        # Call the login function
-        login_attempt = login(request.form['uname'], request.form['pword'])
-
-        # If login fails, redirects to homepage
-        if login_attempt == None:
-            session['warn'] = 'Username or Password Invalid'
-            return redirect(url_for('index'))
-
-        # Stores the necessary user data
-        session['userid'] = login_attempt[0]
-        session['uname'] = login_attempt[1]
-        session['access'] = login_attempt[2]
-
     # If user is not logged in
     if 'access' not in session:
-        # Sets any warning messages
-        if 'warn' in session:
-            warn = session['warn']
-            session.pop('warn')
-        else:
-            warn = None
-
         # Renders the page
-        return render_template('login.j2', warn=warn)
+        return render_template('login.j2')
         
     # Redirects to chat page for users
     if session['access'] == 1:
-            
-        # Connects to the database
-        conn = sqlite3.connect('users.db')
-        cur = conn.cursor()
-
-        # Gets the user's team id and name
-        results = cur.execute('SELECT team_name, team_id FROM user_teams JOIN teams USING (team_id) WHERE user_id = ?', (session['userid'],))
-        results = results.fetchone()
-            
-        # Closes the database conncetion
-        cur.close()
-        conn.close()
-            
-        # Stores the user's team data
-        session['team_name'] = results[0]
-        session['team_id'] = results[1]
-
-        # Stores the ongoing message log    
-        session['message_log'] = []
-
-        # Stores the bot object
-        app.config['bot'] = chatbot_setup(session['uname'], 'TODO GRAB GPT KEY')
-
-        # Stores the team name
-        session['team_name'] = app.config['bot'].team_name
-
         return redirect(url_for('user_chat'))
 
     # Redirects to mangagement page for managers
@@ -116,17 +67,9 @@ def manage():
     if 'create_team' in request.form:
         return redirect(url_for('create_team'))
 
-    # Redirects to team view page when button is clicked
-    if 'view_teams' in request.form:
-        return redirect(url_for('view_teams'))
-
     # Redirects to team creation page when button is clicked
     if 'create_user' in request.form:
         return redirect(url_for('create_user'))
-
-    # Redirects to team creation page when button is clicked
-    if 'view_users' in request.form:
-        return redirect(url_for('view_users'))
 
     # Renders management homepage
     return render_template('manage.j2')
@@ -251,6 +194,85 @@ def create_manager():
     if not valid_access(3):
         return redirect(url_for('index'))
 
+@app.route('/login', methods=['POST'])
+def login():
+    # If Login information is not in the request, redirect back to login page
+    if 'uname' not in request.form or 'pword' not in request.form:
+        return redirect(url_for('index'))
+
+    # Connect to the user database
+    conn = sqlite3.connect('users.db')
+    cur = conn.cursor()
+
+    # Gets user with username
+    results = cur.execute('SELECT * FROM users WHERE username = ?', (request.form['uname'],))
+    results = results.fetchone()
+
+    # Closes the database connection
+    cur.close()
+    conn.close()
+
+    # If no user is found, it redirects back to the login page
+    if results == None:
+        return redirect(url_for('index'))
+
+    # Encodes entered password
+    pword = request.form['pword'].encode('utf-8')
+    
+    # Compares passwords, redirects back to login page if it is incorrect
+    if not bcrypt.checkpw(pword, results[2]):
+        return redirect(url_for('index'))
+
+    # Sets the session variables
+    session['userid'] = results[0]
+    session['uname'] = results[1]
+    session['access'] = results[3]
+
+    # If the user is a student
+    if session['access'] == 1:
+        # Connects to the user database
+        conn = sqlite3.connect('users.db')
+        cur = conn.cursor()
+
+        # Gets the user's team id and name
+        results = cur.execute('SELECT team_name, team_id FROM user_teams JOIN teams USING (team_id) WHERE user_id = ?', (session['userid'],))
+        results = results.fetchone()
+
+        # Gets the gpt key associated with the manager
+        gpt_key = cur.execute('SELECT gpt_key FROM manager_teams JOIN users USING (user_id) WHERE team_id = ?', (results[1], ))
+        gpt_key.fetchone()
+
+        # Closes the database connection
+        cur.close()
+        conn.close()
+
+        # Sets the student exclusive session variables
+        session['team_name'] = results[0]
+        session['team_id'] = results[1]
+        session['message_log'] = []
+
+        # Stores the gpt bot in the app.config
+        app.config['bot'] = Bot(gpt_key)
+
+        # Sets the gpt bot variables
+        app.config['bot'].team_members = [username]
+        app.config['bot'].temp_members = [username]
+        app.config['bot'].team_name = session['team_name']
+
+    return redirect(url_for('index'))
+
+@app.route('/logout', methods=['GET', 'POST'])
+def logout():
+    # Clears the session variables
+    session.clear()
+
+    # Clears the gpt bot if applicable
+    if 'bot' in app.config:
+        app.config.pop('bot')
+    
+    # Redirects to login page
+    return redirect(url_for('index'))
+
 def valid_access(access_level):
     # Ensures the user is logged in
     if 'uname' not in session or 'access' not in session:
@@ -273,32 +295,6 @@ def gen_team_id():
         
     # Returns string
     return team_id
-
-def login(uname, pword):
-    # Connects to the user database
-    conn = sqlite3.connect('users.db')
-    cur = conn.cursor()
-
-    # Gets user with username
-    results = cur.execute('SELECT * FROM users WHERE username = ?', (uname,))
-    results = results.fetchone()
-
-    # Closes the database connection
-    cur.close()
-    conn.close()
-    # If no user is found, it returns None
-    if results == None:
-        return None
-
-    # Encodes entered password
-    pword = pword.encode('utf-8')
-    
-    # Compares passwords, returns None if it is incorrect
-    if not bcrypt.checkpw(pword, results[2]):
-        return None
-     
-    # Returns user_id, username, access_level, gpt_key, team_id, and team_name
-    return (results[0], results[1], results[3], results[4])
 
 def save_chat():        
     # Creates chat folder if it doesn't exist  
@@ -336,7 +332,7 @@ def save_chat():
 @app.route('/logout', methods=['GET', 'POST'])
 def logout():
     session.clear()
-    if 'bot' in app.config:
+    if 'pop' in app.config:
         app.config.pop('bot')
     
     return redirect(url_for('index'))
