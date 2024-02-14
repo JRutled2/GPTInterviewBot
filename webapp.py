@@ -45,7 +45,11 @@ def user_chat():
     # This if else statment is used to generate the next response message
     # If statement for when the user is currently chatting
     if 'chat' in request.form:
-        session['message_log'] = app.config['bot'].chat(request.form['chat'])
+        try:
+            session['message_log'] = app.config['bot'].chat(request.form['chat'])
+        except:
+            session['message_log'] += [{'role': 'assistant', 'content': 'Error, please contact an Administrator.'}]
+
     # If statement for when the user is finished chatting
     elif 'finish' in request.form:
         save_chat()
@@ -203,12 +207,14 @@ def gpt_key():
     if request.method == 'POST':
         new_key = request.form['key']
         
-        # Sets the new GPT key
+        # Connects to user database
         con = sqlite3.connect('users.db')
         cur = con.cursor()
         
+        # Updates the GPT Key
         cur.execute('UPDATE users SET gpt_key=? WHERE user_id = ?', (new_key, session['userid']))
         
+        # Commits and closes the database connection
         con.commit()
         cur.close()
         con.close()
