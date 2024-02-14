@@ -1,0 +1,9 @@
+{% extends "main.html" %}
+
+
+{% block content %}
+<form method="POST">
+    <textarea rows="3" cols="50" name="key" id="key">{{old_key}}</textarea>
+    <input type="submit" value="Change Key" />
+</form>
+{% endblock %}

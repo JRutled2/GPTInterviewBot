@@ -8,7 +8,7 @@
         <div class="topnav">
 
             <a href="{{url_for('logout')}}" class="navright">Logout</a>
-            <a href="#" class="navright">More</a>
+            <a href="{{url_for('gpt_key')}}" class="navright">More</a>
             {% if session['access'] > 1 %}
             <a href="{{url_for('index')}}">Home</a>
             <a href="{{url_for('view_teams')}}">Teams</a>

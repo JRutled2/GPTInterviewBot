@@ -26,6 +26,7 @@ def add_dummy_data():
     c.execute('INSERT INTO users VALUES ("5","Test User 3", ?, 1, "");', (hash,))
     c.execute('INSERT INTO users VALUES ("6","Test User 4", ?, 1, "");', (hash,))
     c.executescript(f'''
+        INSERT INTO manager_teams VALUES ("2", "23");           
         INSERT INTO user_teams VALUES ("2", "Management Team");
         INSERT INTO user_teams VALUES ("3", "23");       
         INSERT INTO teams VALUES ("23", "Test Team 1");

@@ -194,6 +194,38 @@ def create_manager():
     if not valid_access(3):
         return redirect(url_for('index'))
 
+@app.route('/manage/gpt_key', methods=['GET', 'POST'])
+def gpt_key():
+    # Checks the user's access
+    if not valid_access(2):
+        return redirect(url_for('index'))
+    
+    if request.method == 'POST':
+        new_key = request.form['key']
+        
+        # Sets the new GPT key
+        con = sqlite3.connect('users.db')
+        cur = con.cursor()
+        
+        cur.execute('UPDATE users SET gpt_key=? WHERE user_id = ?', (new_key, session['userid']))
+        
+        con.commit()
+        cur.close()
+        con.close()
+
+    # Gets the current GPT key
+    conn = sqlite3.connect('users.db')
+    cur = conn.cursor()
+    
+    results = cur.execute('SELECT gpt_key FROM users WHERE user_id = ?', (session['userid'], ))
+    results = results.fetchone()[0]
+
+    cur.close()
+    conn.close()
+
+    # Renders the webpage
+    return render_template('gpt_key.j2', old_key=results)
+
 @app.route('/login', methods=['POST'])
 def login():
     # If Login information is not in the request, redirect back to login page
@@ -240,7 +272,7 @@ def login():
 
         # Gets the gpt key associated with the manager
         gpt_key = cur.execute('SELECT gpt_key FROM manager_teams JOIN users USING (user_id) WHERE team_id = ?', (results[1], ))
-        gpt_key.fetchone()
+        gpt_key = gpt_key.fetchone()[0]
 
         # Closes the database connection
         cur.close()
@@ -255,8 +287,8 @@ def login():
         app.config['bot'] = Bot(gpt_key)
 
         # Sets the gpt bot variables
-        app.config['bot'].team_members = [username]
-        app.config['bot'].temp_members = [username]
+        app.config['bot'].team_members = [session['uname']]
+        app.config['bot'].temp_members = [session['uname']]
         app.config['bot'].team_name = session['team_name']
 
     return redirect(url_for('index'))
@@ -326,23 +358,6 @@ def save_chat():
     # Writes to the json file
     with open(os.path.join('chats', f'{session["team_id"]}.json'), 'w') as f:
             f.write(j)
-
-# --------Needs Updating----------
-
-@app.route('/logout', methods=['GET', 'POST'])
-def logout():
-    session.clear()
-    if 'pop' in app.config:
-        app.config.pop('bot')
-    
-    return redirect(url_for('index'))
-
-def chatbot_setup(username, gptkey):
-    bot = Bot(gptkey)
-    bot.team_members = [username]
-    bot.temp_members = [username]
-    bot.team_name = session['team_name']
-    return bot
 
 if __name__ == '__main__': 
     #app.run(host='0.0.0.0', port=12429)
