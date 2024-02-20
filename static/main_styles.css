@@ -53,8 +53,8 @@ table {
     color: white;
     font-size: 20px;
     max-width: 500px;
-    padding: 25px;
-    border-radius: 25px;
+    padding: 15px;
+    border-radius: 15px;
     border: solid;
     border-color: black;
     margin-top: 5px;
@@ -84,4 +84,35 @@ table {
 #chat_screen div {
     display: inline-block;
     width: 100%;
+}
+
+#chat_box {
+    margin-left: auto;
+    margin-right: auto;
+    min-width: 500px;
+    max-width: 60%;
+    height: 5vh;
+    justify-content: center;
+}
+
+#chat_box textarea {
+    height: 100%;
+    width: 78%;
+    font-size: 18px;
+    border: solid;
+    border-color: black;
+    border-radius: 20px;
+    padding: 20px;
+}
+
+#chat_box button {
+    width: 12%;
+    height: 10vh;
+    background-color: #43b4d3;
+    float: right;
+    border: solid;
+    border-color: black;
+    border-radius: 20px;
+    font-size: 18px;
+    color: white;
 }
