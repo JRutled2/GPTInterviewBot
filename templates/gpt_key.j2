@@ -3,7 +3,7 @@
 
 {% block content %}
 <form method="POST">
-    <textarea rows="3" cols="50" name="key" id="key">{{old_key}}</textarea>
+    <input type="text" placeholder="{{old_key}}" size="80" name="key" id="key" />
     <input type="submit" value="Change Key" />
 </form>
 {% endblock %}

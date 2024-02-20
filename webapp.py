@@ -232,6 +232,36 @@ def gpt_key():
     # Renders the webpage
     return render_template('gpt_key.j2', old_key=results)
 
+@app.route('/past_chat_select', methods=['GET', 'POST'])
+def past_chat_select():
+    # Checks the user's access
+    if not valid_access(1):
+        return redirect(url_for('index'))
+
+    # User view past chats
+    if session['access'] == 1:
+        return redirect(url_for('index'))
+
+    # Manager view past chats
+    if session['access'] == 2:
+        return redirect(url_for('index'))
+
+    # Admin view past chats
+    if session['access'] == 3:
+        return redirect(url_for('index'))
+
+@app.route('/past_chat/<chat_id>')
+def past_chat(chat_id):
+    if not valid_access(1):
+        return redirect(url_for('index'))
+
+    with open(os.path.join('chats', '23.json'), 'r') as f:
+        js = json.load(f)
+
+    print(js['chats'].keys())
+    chat = js['chats']['2024-02-20: 1708446087.7144222']
+    return render_template('past_chat.j2', message_log=chat)
+
 @app.route('/login', methods=['POST'])
 def login():
     # If Login information is not in the request, redirect back to login page
@@ -279,7 +309,7 @@ def login():
         # Gets the gpt key associated with the manager
         gpt_key = cur.execute('SELECT gpt_key FROM manager_teams JOIN users USING (user_id) WHERE team_id = ?', (results[1], ))
         gpt_key = gpt_key.fetchone()[0]
-
+        print(gpt_key)
         # Closes the database connection
         cur.close()
         conn.close()
@@ -324,7 +354,7 @@ def valid_access(access_level):
 
 def gen_team_id():
     # Character options
-    symbs = 'ABCDEFGHIJKLMNPQRSTUVWXYZ123456789'
+    symbs = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'
     
     # Generates string of 5 characters
     team_id = ''

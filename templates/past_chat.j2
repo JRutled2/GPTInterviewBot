@@ -1,0 +1,15 @@
+{% extends "main.html" %}
+
+{% block content %}
+<div id="chat_screen">
+    {% for i in message_log %}
+    <div>
+        {% if i['role'] == 'assistant' %}
+        <p class="chat_bot">{{i['content']}}</p>
+        {% elif i['role'] == 'user'%}
+        <p class="chat_user">{{i['content']}}</p>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -48,3 +48,40 @@ table {
     margin-top: 50px;
     border-collapse: collapse;
 }
+
+.chat_bot, .chat_user {
+    color: white;
+    font-size: 20px;
+    max-width: 500px;
+    padding: 25px;
+    border-radius: 25px;
+    border: solid;
+    border-color: black;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.chat_bot {
+    background-color: #808080;
+}
+
+.chat_user {
+    float: right;
+    
+    background-color: #43b4d3;
+}
+
+#chat_screen {
+    margin-left: auto;
+    margin-right: auto;
+    min-width: 500px;
+    max-width: 60%;
+    justify-content: center;
+    overflow: auto;
+    height: 80vh;
+}
+
+#chat_screen div {
+    display: inline-block;
+    width: 100%;
+}
