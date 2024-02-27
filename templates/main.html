@@ -6,7 +6,6 @@
     <body>
         {% block header %}
         <div class="topnav">
-
             <a href="{{url_for('logout')}}" class="navright">Logout</a>
             <a href="{{url_for('gpt_key')}}" class="navright">More</a>
             {% if session['access'] > 1 %}

@@ -232,8 +232,8 @@ def gpt_key():
     # Renders the webpage
     return render_template('gpt_key.j2', old_key=results)
 
-@app.route('/past_chat_select', methods=['GET', 'POST'])
-def past_chat_select():
+@app.route('/past_chat_select/<team_id>', methods=['GET', 'POST'])
+def past_chat_select(team_id):
     # Checks the user's access
     if not valid_access(1):
         return redirect(url_for('index'))
@@ -244,7 +244,16 @@ def past_chat_select():
 
     # Manager view past chats
     if session['access'] == 2:
-        return redirect(url_for('index'))
+        con = sqlite3.connect('users.db')
+        cur = con.cursor()
+        print(team_id)
+        chats = cur.execute('SELECT chat_id FROM weekly_chats WHERE team_id=?', (team_id,))
+        chats = chats.fetchall()
+
+        cur.close()
+        con.close()
+
+        return render_template('past_chats_select.j2', chats=chats)
 
     # Admin view past chats
     if session['access'] == 3:
@@ -259,7 +268,7 @@ def past_chat(chat_id):
         js = json.load(f)
 
     print(js['chats'].keys())
-    chat = js['chats']['2024-02-20: 1708446087.7144222']
+    chat = js['chats'][chat_id]
     return render_template('past_chat.j2', message_log=chat)
 
 @app.route('/login', methods=['POST'])
@@ -386,7 +395,8 @@ def save_chat():
         
     print(js)
     # Saves the message log
-    js['chats'][f'{date.today()}: {time.time()}'] = session['message_log']
+    chat_id = f'{date.today()}: {time.time()}'
+    js['chats'][chat_id] = session['message_log']
         
     # Dumps it into json format
     j = json.dumps(js, indent=2)
@@ -394,6 +404,16 @@ def save_chat():
     # Writes to the json file
     with open(os.path.join('chats', f'{session["team_id"]}.json'), 'w') as f:
             f.write(j)
+
+    # Saves the chat to the database
+    conn = sqlite3.connect('users.db')
+    cur = conn.cursor()
+
+    cur.execute('INSERT INTO weekly_chats VALUES (?, ?)', (chat_id, session['team_id']))
+    
+    conn.commit()
+    cur.close()
+    conn.close()
 
 if __name__ == '__main__': 
     #app.run(host='0.0.0.0', port=12429)

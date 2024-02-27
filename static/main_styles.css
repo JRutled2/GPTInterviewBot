@@ -62,13 +62,13 @@ table {
 }
 
 .chat_bot {
-    background-color: #808080;
+    background-color: #333;
 }
 
 .chat_user {
     float: right;
     
-    background-color: #43b4d3;
+    background-color: #0026ff;
 }
 
 #chat_screen {
@@ -108,7 +108,7 @@ table {
 #chat_box button {
     width: 12%;
     height: 10vh;
-    background-color: #43b4d3;
+    background-color: #0026ff;
     float: right;
     border: solid;
     border-color: black;

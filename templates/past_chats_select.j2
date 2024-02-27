@@ -1,2 +1,14 @@
 {% extends "main.html" %}
 
+{% block content %}
+<table>
+    <tr>
+        <th>Chat Date & Time</th>
+    </tr>
+    {% for i in chats %}
+    <tr>
+        <td><a href="{{url_for('past_chat', chat_id=i[0])}}">{{i[0]}}</a></td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}
