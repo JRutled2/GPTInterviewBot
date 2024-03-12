@@ -258,18 +258,18 @@ def past_chat_select(team_id):
         cur.close()
         con.close()
 
-        return render_template('past_chats_select.j2', chats=chats)
+        return render_template('past_chats_select.j2', team_id=team_id, chats=chats)
 
     # Admin view past chats
     if session['access'] == 3:
         return redirect(url_for('index'))
 
-@app.route('/past_chat/<chat_id>')
-def past_chat(chat_id):
+@app.route('/past_chat/<team_id>/<chat_id>')
+def past_chat(team_id, chat_id):
     if not valid_access(1):
         return redirect(url_for('index'))
 
-    with open(os.path.join('chats', '23.json'), 'r') as f:
+    with open(os.path.join('chats', f'{team_id}.json'), 'r') as f:
         js = json.load(f)
 
     chat = js['chats'][chat_id]

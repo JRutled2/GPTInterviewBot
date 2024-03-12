@@ -23,10 +23,5 @@
 	</form>
 </div>
 
-<script>
-	window.onload=function () {
-		var objDiv = document.getElementById("chat_screen");
-		objDiv.scrollTop = objDiv.scrollHeight;
-	}
-</script>
+<script src="{{url_for('static', filename='chat.js')}}"></script>
 {% endblock %}

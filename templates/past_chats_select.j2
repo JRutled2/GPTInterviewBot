@@ -7,7 +7,7 @@
     </tr>
     {% for i in chats %}
     <tr>
-        <td><a href="{{url_for('past_chat', chat_id=i[0])}}">{{i[0]}}</a></td>
+        <td><a href="{{url_for('past_chat', team_id=team_id, chat_id=i[0])}}">{{i[0]}}</a></td>
     </tr>
     {% endfor %}
 </table>
