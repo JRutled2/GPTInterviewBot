@@ -22,4 +22,11 @@
 		<button type="submit">Send</button>
 	</form>
 </div>
+
+<script>
+	window.onload=function () {
+		var objDiv = document.getElementById("chat_screen");
+		objDiv.scrollTop = objDiv.scrollHeight;
+	}
+</script>
 {% endblock %}
