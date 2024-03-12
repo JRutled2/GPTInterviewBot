@@ -6,7 +6,7 @@ import json
 import time
 from chatbot import Bot
 from random import choice
-from datetime import date
+from datetime import date, datetime
 from flask import Flask, session, redirect
 from flask.globals import request
 from flask.helpers import url_for
@@ -19,6 +19,7 @@ app.secret_key = uuid.uuid4().hex
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+
     # If user is not logged in
     if 'access' not in session:
         # Renders the page
@@ -289,6 +290,7 @@ def login():
 
     # If no user is found, it redirects back to the login page
     if results == None:
+        log(request.form["uname"], 'incorrect username')
         return redirect(url_for('index'))
 
     # Encodes entered password
@@ -296,12 +298,15 @@ def login():
     
     # Compares passwords, redirects back to login page if it is incorrect
     if not bcrypt.checkpw(pword, results[2]):
+        log(request.form["uname"], 'incorrect password')
         return redirect(url_for('index'))
 
     # Sets the session variables
     session['userid'] = results[0]
     session['uname'] = results[1]
     session['access'] = results[3]
+
+    log(request.form["uname"], 'logged in')
 
     # If the user is a student
     if session['access'] == 1:
@@ -410,6 +415,10 @@ def save_chat():
     conn.commit()
     cur.close()
     conn.close()
+
+def log(uname, text):
+    with open(os.path.join('system_logs', f'{date.today()}.txt'), 'a') as f:
+            f.write(f'{datetime.now()} [{uname}] {text}\n')
 
 if __name__ == '__main__': 
     #app.run(host='0.0.0.0', port=12429)
