@@ -121,6 +121,8 @@ def create_team():
 
     if request.method == 'POST':
         if 'team_name' in request.form:
+            log(session['uname'], f'created team: {request.form["team_name"]}')
+
             # Connects to the database
             conn = sqlite3.connect('users.db')
             cur = conn.cursor()
@@ -170,6 +172,8 @@ def create_user():
 
     if request.method == 'POST':
         if 'username' in request.form:
+            log(session['uname'], f'created user: {request.form["username"]}')
+
             # Connects to the user database
             conn = sqlite3.connect('users.db')
             cur = conn.cursor()
@@ -206,6 +210,7 @@ def gpt_key():
         return redirect(url_for('index'))
     
     if request.method == 'POST':
+        log(session['uname'], 'gpt key change')
         new_key = request.form['key']
         
         # Connects to user database
@@ -342,6 +347,8 @@ def login():
 
 @app.route('/logout', methods=['GET', 'POST'])
 def logout():
+
+    log(session['uname'], 'logged out')
     # Clears the session variables
     session.clear()
 
