@@ -286,7 +286,7 @@ def login():
     cur = conn.cursor()
 
     # Gets user with username
-    results = cur.execute('SELECT * FROM users WHERE username = ?', (request.form['uname'],))
+    results = cur.execute('SELECT * FROM users WHERE LOWER(username) = ?', (request.form['uname'].lower(),))
     results = results.fetchone()
 
     # Closes the database connection
@@ -298,20 +298,21 @@ def login():
         log(request.form["uname"], 'incorrect username')
         return redirect(url_for('index'))
 
+    session['uname'] = results[1]
+
     # Encodes entered password
     pword = request.form['pword'].encode('utf-8')
     
     # Compares passwords, redirects back to login page if it is incorrect
     if not bcrypt.checkpw(pword, results[2]):
-        log(request.form["uname"], 'incorrect password')
+        log(session['uname'], 'incorrect password')
         return redirect(url_for('index'))
 
     # Sets the session variables
     session['userid'] = results[0]
-    session['uname'] = results[1]
     session['access'] = results[3]
 
-    log(request.form["uname"], 'logged in')
+    log(session['uname'], 'logged in')
 
     # If the user is a student
     if session['access'] == 1:
