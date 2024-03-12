@@ -1,0 +1,1 @@
+# System Logs are stored here in txt format

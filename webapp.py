@@ -246,7 +246,6 @@ def past_chat_select(team_id):
     if session['access'] == 2:
         con = sqlite3.connect('users.db')
         cur = con.cursor()
-        print(team_id)
         chats = cur.execute('SELECT chat_id FROM weekly_chats WHERE team_id=?', (team_id,))
         chats = chats.fetchall()
 
@@ -267,7 +266,6 @@ def past_chat(chat_id):
     with open(os.path.join('chats', '23.json'), 'r') as f:
         js = json.load(f)
 
-    print(js['chats'].keys())
     chat = js['chats'][chat_id]
     return render_template('past_chat.j2', message_log=chat)
 
@@ -318,7 +316,6 @@ def login():
         # Gets the gpt key associated with the manager
         gpt_key = cur.execute('SELECT gpt_key FROM manager_teams JOIN users USING (user_id) WHERE team_id = ?', (results[1], ))
         gpt_key = gpt_key.fetchone()[0]
-        print(gpt_key)
         # Closes the database connection
         cur.close()
         conn.close()
@@ -393,7 +390,6 @@ def save_chat():
         # Loads data
         js = json.load(f)
         
-    print(js)
     # Saves the message log
     chat_id = f'{date.today()}: {time.time()}'
     js['chats'][chat_id] = session['message_log']
