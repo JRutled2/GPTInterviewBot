@@ -47,7 +47,8 @@ def user_chat():
     # If statement for when the user is currently chatting
     if 'chat' in request.form:
         try:
-            session['message_log'] = app.config['bot'].chat(request.form['chat'])
+            app.config['bot'].chat(request.form['chat'])
+            session['message_log'] = app.config['bot'].get_log()
         except:
             session['message_log'] += [{'role': 'assistant', 'content': 'Error, please contact an Administrator.'}]
 
@@ -57,7 +58,8 @@ def user_chat():
         return redirect(url_for('logout'))
     # Else statement for initial chat message, necessary for when the message log is empty
     else:
-        session['message_log'] = app.config['bot'].chat('')
+        app.config['bot'].chat('')
+        session['message_log'] = app.config['bot'].get_log()
 
     # Renders the chat page
     return render_template('chat.j2', message_log=session['message_log'])
@@ -340,9 +342,8 @@ def login():
         app.config['bot'] = Bot(gpt_key)
 
         # Sets the gpt bot variables
-        app.config['bot'].team_members = [session['uname']]
-        app.config['bot'].temp_members = [session['uname']]
         app.config['bot'].team_name = session['team_name']
+        app.config['bot'].team_name = session['team_id']
 
     return redirect(url_for('index'))
 

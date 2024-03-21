@@ -1,156 +1,82 @@
-import openai
 from openai import OpenAI
-import asyncio
+from os import sys
 
-class Bot():    
-    """ Interview Bot Class
-    
-    The interview bot it used to conduct interviews with students
-    on how their project is progressing
-    
-    Attributes:
-        team_members (list[str]): A list of all the team members working on the project.
-        message_log (list[dict[str]]): A list of messages between the user, system, and GPT, 
-            each element in the list is a dictionary containing the role and content.
-        chat_stage (int): Keeps track of current stage in the interview, used for the chat function.
-            chat_stage  Chat aspect         Method Called
-            ---------   -----------         -------------
-                0       Previous Week       chat_previous_week
-                1       Problems            chat_problems
-               2/3      Plans               chat_plans
-                4       Concerns            chat_concerns
-        temp_members (list[str]): List of team members that is modified for specific funtions
-        
-    """
-    
-    def __init__(self, gpt_key: str, ) -> None:  
-        # Stores all the team members
-        self.team_members: list[str] = []
+default_prompts = ['Hello, what have you accomplished in the past week?', 
+                   'Were there any issues you were unable to solve?',
+                   'What do you plan to accomplish this upcoming week?',
+                   'Split the task the user stats into a list seperated by new lines.  Do not add any extra text.',
+                   'Ask the user about their plan to ',
+                   ". If their statements don't fulfll the S.M.A.R.T. goals, ask them more questions that will fulfill them.  Only ask them one question at a time.  When they have fulfilled all the S.M.A.R.T. goals, say \"Done!\""]
+
+class Bot():
+    def __init__(self, gpt_key):
         self.team_name = ''
-        self.message_log = []
-        self.chat_stage: int = 0
-        self.temp_members: list[str] = self.team_members
+        self.team_id = ''
 
-        # Sets the openai key
+        self.chat_stage = 0
+
+        self.static_log = []
+        self.message_log = []
+
+        self.plans = []
+        self.plans_stage = 0
+
         self.client = OpenAI(api_key=gpt_key)
 
-    def ask_gpt(self, ) -> None:
-        """ Method that Generates a New Response From the GPT Model
-        
-        This method generates a ChatCompletion from the openai API
-        and adds output to the message_log variable.
-            
-        ChatCompletion API:
-        https://platform.openai.com/docs/api-reference/completions/create
-        
-        """
-        
-        # Completion object that contains the output from GPT
-        completion = self.client.chat.completions.create(model="gpt-3.5-turbo", messages=self.message_log)
-        
-        print(completion)
-        # Adds GPT output to the message log
-        self.message_log += [{'role': 'assistant', 'content': completion.choices[0].message.content}]
+    def get_log(self, ):
+        return self.static_log + self.message_log
 
-    def chat(self, user_input: str, ):
-        """ Chat Method That the User Interacts With
-        
-        This is the main function that the user calls when using the Chatbot.
-        This function calls other, more specific funtions depending on the current chat stage. 
-        
-        Args:
-            user_input (str): The input from the user
-        
-        Returns:
-            list[dict[str]]: This method returns the current chatlog, past chats and any newly added chats
-            
-        """
-        
-        # If the userinput is not empty, then it adds it onto the end.
-        # The user input will only be empty on the first time chat is called.
-        if user_input != '':
-            self.message_log += [{'role': 'user', 'content': user_input}]
-            
-        # Calls appropriate method based on chat stage
+    def chat(self, message):
+        # Stage 0
         if self.chat_stage == 0:
-            self.chat_previous_week()
+            self.static_log += [{'role': 'assistant', 'content': default_prompts[0]}]
+            self.chat_stage += 1
+        # Stage 1
         elif self.chat_stage == 1:
-            self.chat_problems()
-        elif self.chat_stage in [2, 3]:
-            self.chat_plans()
+            self.static_log += [{'role': 'user', 'content': message}]
+            self.static_log += [{'role': 'assistant', 'content': default_prompts[1]}]
+            self.chat_stage += 1
+        # Stage 2
+        elif self.chat_stage == 2:
+            self.static_log += [{'role': 'user', 'content': message}]
+            self.static_log += [{'role': 'assistant', 'content': default_prompts[2]}]
+            self.chat_stage += 1
+        # Stage 3
+        elif self.chat_stage == 3:
+            self.static_log += [{'role': 'user', 'content': message}]
+
+            completion = self.client.chat.completions.create(model="gpt-3.5-turbo", messages=[{'role': 'system',
+                                                                                               'content': default_prompts[3]},
+                                                                                              {'role': 'user',
+                                                                                               'content': message}])
+
+            self.plans = completion.choices[0].message.content.split('\n')
+            self.message_log = [{'role': 'system', 'content': default_prompts[4] + self.plans[0] + default_prompts[5]}]
+
+            completion = self.client.chat.completions.create(model="gpt-3.5-turbo", messages=self.message_log)
+            self.message_log += [{'role': 'assistant', 'content': completion.choices[0].message.content}]
+            self.chat_stage += 1
+        # Stage 4
         elif self.chat_stage == 4:
-            self.chat_concerns()
-        
-        # Returns the message_logs
-        return self.message_log
-    
-    def chat_previous_week(self, ) -> None:
-        """ Previous Week Chat Method
-        
-        This method asks each team member what they have acomplished in the past week.
-        Each time it is called it asks the next team member what they acomplished.
-        
-        """
-        
-        # If it the last team member, it increases the chat stage
-        if len(self.temp_members) == 1:
-            self.chat_stage = 1
-        
-        # Asks a different questions based on if it is the first time chatting
-        if len(self.temp_members) == len(self.temp_members):
-            self.message_log += [{'role': 'assistant', 'content': f'Hello, what has {self.temp_members[0]} acomplished in the past week?'}]
-        else:
-            self.message_log += [{'role': 'assistant', 'content': f'Thank you, now what has {self.temp_members[0]} acomplished in the past week?'}]
-        
-        # Removes first member from temp list
-        self.team_members = self.team_members[1:]
-    
-    def chat_problems(self, ) -> None:
-        """ Asks if the User Had Any Problems
-        
-        This method asks the user if they had any problems they were unable
-        to solve in the last week.
-        
-        TODO: Add Dynamic Questions
-        
-        """
-        
-        # Increases the chat stage
-        self.chat_stage = 2
-        
-        # Adds the problem question to the message_log
-        self.message_log += [{'role': 'assistant', 'content': f'Have you had any problems that you were unable to solve?'}]
-    
-    def chat_plans(self, ) -> None:
-        """ Asks about Plans for Upcoming Week
-        
-        This method asks about the users plans for the upcoming week.
-        The first time it is called, it adds the system content to the message log.
-        
-        """
-        
-        # If the stage is 2, it adds the system content.
-        # The stage will only be 2 the first time it is called.
-        if self.chat_stage == 2:
-            self.message_log += [{'role': 'system', 'content': "You are asking me about what I plan to complete in the next week."},
-                                 {'role': 'system', 'content': "If my statements don't fulfll the S.M.A.R.T. goals, ask me more questions that will fulfill them.  Only ask me one question at a time.  When I have fulfilled all the S.M.A.R.T. goals, say Done!"}]
-            self.chat_stage = 3
-        
-        # Calls the GPT method
-        self.ask_gpt()
-        
-        # If GPT says "Done!", it increases the chat stage
-        if 'Done!' in self.message_log[-1]['content'] and self.message_log[-1]['role'] == 'assistant':
-            self.chat_stage = 4
-    
-    def chat_concerns(self, ) -> None:
-        """ Asks about Any Concerns They Have
-        
-        This method asks the users about any concerns they may have.
-        
-        TODO: Add Dynamic Questions
-        
-        """
-        
-        # Adds the question about concerns to the message_log
-        self.message_log += [{'role': 'assistant', 'content': f'Do you have any other comments or concerns?'}]
+            self.message_log += [{'role': 'user', 'content': message}]
+
+            if 'pass' in message:
+                self.plans_stage += 1
+                if self.plans_stage >= len(self.plans):
+                    sys.exit(0) # Currently Exits the program, should contiue to Stage 5
+                self.message_log = [{'role': 'system', 'content': default_prompts[4] + self.plans[self.plans_stage] + default_prompts[5]}]
+
+            completion = self.client.chat.completions.create(model="gpt-3.5-turbo", messages=self.message_log)
+            self.message_log += [{'role': 'assistant', 'content': completion.choices[0].message.content}]
+
+            if 'Done!' in completion.choices[0].message.content:
+                self.plans_stage += 1
+                if self.plans_stage >= len(self.plans):
+                    sys.exit(0) # Currently Exits the program, should contiue to Stage 5
+                self.message_log = [{'role': 'system', 'content': default_prompts[4] + self.plans[self.plans_stage] + default_prompts[5]}]
+                completion = self.client.chat.completions.create(model="gpt-3.5-turbo", messages=self.message_log)
+                self.message_log += [{'role': 'assistant', 'content': completion.choices[0].message.content}]
+
+        # Stage 5    
+        if self.chat_stage == 5:
+            print('Done!')
