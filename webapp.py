@@ -164,7 +164,8 @@ def view_users():
     results = cur.execute('SELECT users.username, user_teams.team_id FROM (manager_teams JOIN user_teams USING (team_id)) JOIN users ON user_teams.user_id = users.user_id WHERE manager_teams.user_id = ?', 
                           (session['userid']))
     results = results.fetchall()
-    return results
+    print(results)
+    return render_template('view_users.j2', users=results)
 
 @app.route('/manage/create_user', methods=['GET', 'POST'])
 def create_user():
@@ -349,7 +350,6 @@ def login():
 
 @app.route('/logout', methods=['GET', 'POST'])
 def logout():
-
     log(session['uname'], 'logged out')
     # Clears the session variables
     session.clear()
