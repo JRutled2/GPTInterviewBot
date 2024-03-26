@@ -348,6 +348,9 @@ def login():
 
 @app.route('/logout', methods=['GET', 'POST'])
 def logout():
+    # Save Chat
+    if session['access'] == 1:
+        save_chat()
 
     log(session['uname'], 'logged out')
     # Clears the session variables

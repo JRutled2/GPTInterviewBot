@@ -17,7 +17,7 @@
 	{% endfor %}
 </div>
 <div id="chat_box">
-	<form action="{{url_for('user_chat')}}" method="POST">
+	<form action="{{url_for('user_chat')}}" method="POST" onsubmit="formSubmitted = true">
 		<textarea id="chat" name="chat"></textarea>
 		<button type="submit">Send</button>
 	</form>
