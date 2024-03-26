@@ -365,6 +365,36 @@ def logout():
     # Redirects to login page
     return redirect(url_for('index'))
 
+@app.route('/register')
+def register():
+    if request.method == 'POST':
+        if 'username' in request.form:
+            log(session['uname'], f'created user: {request.form["username"]}')
+
+            # Connects to the user database
+            conn = sqlite3.connect('users.db')
+            cur = conn.cursor()
+
+            # Generates a unique user id
+            user_id = uuid.uuid4().hex
+            
+            # Hashes the password
+            bytes = request.form['password'].encode('utf-8') 
+            salt = bcrypt.gensalt() 
+            hash = bcrypt.hashpw(bytes, salt)
+
+            # Adds the user to the login database
+            cur.execute('INSERT INTO users (user_id, username, password, access) VALUES (?,?,?,?)', (user_id, request.form['username'], hash, 1))
+            cur.execute('INSERT INTO user_teams VALUES (?,?)', (user_id, request.form['team_id']))
+
+            # Commits the insert
+            conn.commit()
+            cur.close()
+            conn.close()
+
+            return redirect(url_for('index'))
+    return render_template('register.j2')
+
 def valid_access(access_level):
     # Ensures the user is logged in
     if 'uname' not in session or 'access' not in session:
