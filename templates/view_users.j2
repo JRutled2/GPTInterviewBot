@@ -1,0 +1,16 @@
+{% extends "main.html" %}
+
+{% block content %}
+<table>
+    <tr>
+        <th>User</th>
+        <th>Team</th>
+    </tr>
+    {% for i in users %}
+    <tr>
+        <td>{{i[0]}}</td>
+        <td>{{i[1]}}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}
