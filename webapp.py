@@ -1,4 +1,5 @@
 import os
+import sys
 import sqlite3
 import bcrypt 
 import uuid
@@ -464,5 +465,7 @@ def log(uname, text):
             f.write(f'{datetime.now()} [{uname}] {text}\n')
 
 if __name__ == '__main__': 
-    #app.run(host='0.0.0.0', port=12429)
-    app.run(debug=True)
+    if len(sys.argv) > 1:
+        app.run(host='0.0.0.0', port=int(sys.argv[1]))
+    else:
+        app.run(debug=True)
