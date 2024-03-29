@@ -1,7 +1,34 @@
 import sqlite3
 import bcrypt 
+import uuid
 
-def create_user_DB():
+def add_managers():
+    username = input('username: ')
+    password = input('password: ')
+
+    bytes = password.encode('utf-8') 
+    salt = bcrypt.gensalt() 
+    hash = bcrypt.hashpw(bytes, salt)
+    user_id = uuid.uuid4().hex
+
+    conn = sqlite3.connect('users.db')
+    c = conn.cursor()
+    c.execute('INSERT INTO users VALUES (?, ?, ?, 2, "Enter GPT Key Here");', (user_id, username, hash,))
+    conn.commit()
+    c.close()
+    conn.close()
+    print('Added Manager', username)
+
+def print_managers():
+    conn = sqlite3.connect('users.db')
+    c = conn.cursor()
+    cur =  c.execute('SELECT user_id, username FROM users WHERE access=2')
+    for row in cur.fetchall():
+        print(f'[{row[0]}] {row[1]}')
+    c.close()
+    conn.close()
+
+def rebuild_database():
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
     f = open('database_schema.sql','r').read()
@@ -9,48 +36,26 @@ def create_user_DB():
     conn.commit()
     c.close()
     conn.close()
-    pass
 
-def add_dummy_data():
-    password = 'test'
-    bytes = password.encode('utf-8') 
-    salt = bcrypt.gensalt() 
-    hash = bcrypt.hashpw(bytes, salt)
 
-    conn = sqlite3.connect('users.db')
-    c = conn.cursor()
-    c.execute('INSERT INTO users VALUES ("1", "Test Admin", ?, 3, "Optional GPT Key");', (hash,))
-    c.execute('INSERT INTO users VALUES ("2","Test Manage", ?, 2, "Managers GPT Key");', (hash,))
-    c.execute('INSERT INTO users VALUES ("3","Test User 1", ?, 1, "");', (hash,))
-    c.execute('INSERT INTO users VALUES ("4","Test User 2", ?, 1, "");', (hash,))
-    c.execute('INSERT INTO users VALUES ("5","Test User 3", ?, 1, "");', (hash,))
-    c.execute('INSERT INTO users VALUES ("6","Test User 4", ?, 1, "");', (hash,))
-    c.executescript(f'''
-        INSERT INTO manager_teams VALUES ("2", "23");           
-        INSERT INTO user_teams VALUES ("2", "Management Team");
-        INSERT INTO user_teams VALUES ("3", "23");       
-        INSERT INTO teams VALUES ("23", "Test Team 1");
-        ''')
-    conn.commit()
-    c.close()
-    conn.close()
+uin = input('> ').lower()
+while uin != 'q' and uin != 'quit':
+    if uin == 'help':
+        print('[1] add_managers\n'+
+              '[2] print_managers\n'+
+              '[0] more_options')
+    if uin == '0':
+        print('[x] rebuild_database')
 
-def print_users():
-    conn = sqlite3.connect('users.db')
-    c = conn.cursor()
-    cur =  c.execute('SELECT * FROM users')
-    for row in cur.fetchall():
-        print(row)
-    c.close()
-    conn.close()
+    elif uin == '1' or uin == 'add_managers':
+        add_managers()
 
-uin = input('Rebuild Database? (y/n)\n>')
-if uin == 'y':
-    create_user_DB()
-    uin = input('Add Dummy Data? (y/n)\n>')
-    if uin == 'y':
-        add_dummy_data()
+    elif uin == '2' or uin == 'print_managers':
+        print_managers()
 
-uin = input('Print Users? (y/n)\n>')
-if uin == 'y':
-    print_users()
+    elif uin == 'x' or uin == 'rebuild_database':
+        in2 = input('Are You Sure? [y/n]\n> ').lower()
+        if in2 == 'y':
+            rebuild_database()
+            print('Database Rebuilt')
+    uin = input('> ').lower()

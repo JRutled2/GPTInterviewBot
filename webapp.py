@@ -365,7 +365,7 @@ def logout():
     # Redirects to login page
     return redirect(url_for('index'))
 
-@app.route('/register')
+@app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
         if 'username' in request.form:
