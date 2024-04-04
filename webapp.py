@@ -373,7 +373,6 @@ def logout():
 def register():
     if request.method == 'POST':
         if 'username' in request.form:
-            log(session['uname'], f'created user: {request.form["username"]}')
 
             # Connects to the user database
             conn = sqlite3.connect('users.db')
@@ -395,6 +394,8 @@ def register():
             conn.commit()
             cur.close()
             conn.close()
+            
+            log(request.form['username'], f'registered an account')
 
             return redirect(url_for('index'))
     return render_template('register.j2')
