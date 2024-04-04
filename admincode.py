@@ -28,6 +28,14 @@ def print_managers():
     c.close()
     conn.close()
 
+def change_access():
+    uid = input('user id: ')
+    access = int(input('access level: '))
+
+    conn = sqlite3.connect('users.db')
+    c = conn.cursor()
+    c.execute('')
+
 def rebuild_database():
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
@@ -38,11 +46,12 @@ def rebuild_database():
     conn.close()
 
 
-uin = input('> ').lower()
+uin = 'help'
 while uin != 'q' and uin != 'quit':
     if uin == 'help':
         print('[1] add_managers\n'+
               '[2] print_managers\n'+
+              '[3] change_access\n' +
               '[0] more_options')
     if uin == '0':
         print('[x] rebuild_database')
@@ -52,6 +61,9 @@ while uin != 'q' and uin != 'quit':
 
     elif uin == '2' or uin == 'print_managers':
         print_managers()
+
+    elif uin == '3' or uin == 'change_access':
+        change_access()
 
     elif uin == 'x' or uin == 'rebuild_database':
         in2 = input('Are You Sure? [y/n]\n> ').lower()

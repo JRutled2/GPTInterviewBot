@@ -62,6 +62,9 @@ def user_chat():
         app.config['bot'].chat('')
         session['message_log'] = app.config['bot'].get_log()
 
+    if app.config['bot'].chat_stage == 5:
+        save_chat()
+
     # Renders the chat page
     return render_template('chat.j2', message_log=session['message_log'])
 

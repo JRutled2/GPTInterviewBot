@@ -6,7 +6,8 @@ default_prompts = ['Hello, what have you accomplished in the past week?',
                    'What do you plan to accomplish this upcoming week?',
                    'Split the task the user stats into a list seperated by new lines.  Do not add any extra text.',
                    'Ask the user about their plan to ',
-                   ". If their statements don't fulfll the S.M.A.R.T. goals, ask them more questions that will fulfill them.  Only ask them one question at a time.  When they have fulfilled all the S.M.A.R.T. goals, say \"Done!\""]
+                   '. If their statements don\'t fulfll the S.M.A.R.T. goals, ask them more questions that will fulfill them.  Only ask them one question at a time and do not menthion the S.M.A.R.T. goals.  When they have fulfilled all the S.M.A.R.T. goals, say "Done!"',
+                   'Thank you for chatting this week.  If you have any questions or concerns please let your professor know. Done!']
 
 class Bot():
     def __init__(self, gpt_key):
@@ -63,20 +64,23 @@ class Bot():
             if 'pass' in message:
                 self.plans_stage += 1
                 if self.plans_stage >= len(self.plans):
-                    sys.exit(0) # Currently Exits the program, should contiue to Stage 5
-                self.message_log = [{'role': 'system', 'content': default_prompts[4] + self.plans[self.plans_stage] + default_prompts[5]}]
-
-            completion = self.client.chat.completions.create(model="gpt-3.5-turbo", messages=self.message_log)
-            self.message_log += [{'role': 'assistant', 'content': completion.choices[0].message.content}]
-
-            if 'Done!' in completion.choices[0].message.content:
-                self.plans_stage += 1
-                if self.plans_stage >= len(self.plans):
-                    sys.exit(0) # Currently Exits the program, should contiue to Stage 5
-                self.message_log = [{'role': 'system', 'content': default_prompts[4] + self.plans[self.plans_stage] + default_prompts[5]}]
+                    self.chat_stage += 1
+                else:
+                    self.message_log = [{'role': 'system', 'content': default_prompts[4] + self.plans[self.plans_stage] + default_prompts[5]}]
+            if self.chat_stage == 4:
                 completion = self.client.chat.completions.create(model="gpt-3.5-turbo", messages=self.message_log)
                 self.message_log += [{'role': 'assistant', 'content': completion.choices[0].message.content}]
 
+                if 'Done!' in completion.choices[0].message.content:
+                    self.plans_stage += 1
+                    if self.plans_stage >= len(self.plans):
+                        self.chat_stage += 1
+                    else:
+                        self.message_log = [{'role': 'system', 'content': default_prompts[4] + self.plans[self.plans_stage] + default_prompts[5]}]
+                        completion = self.client.chat.completions.create(model="gpt-3.5-turbo", messages=self.message_log)
+                        self.message_log += [{'role': 'assistant', 'content': completion.choices[0].message.content}]
+
         # Stage 5    
         if self.chat_stage == 5:
-            print('Done!')
+            self.message_log = [{'role': 'assistant', 'content': default_prompts[6]}]
+            self.chat_stage += 1
