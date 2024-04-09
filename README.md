@@ -1,35 +1,26 @@
-# BuisnessInterviewBot
+# Usage Guide
 
-# Installation and Usage
+## Setup
 1. Download the Code
 2. Run the following pip commands:
-  - pip install --upgrade openai
-  - pip install --upgrade bcrypt
-  - pip install --upgrade flask
-4a. Run webapp.py
-4b. Run webapp.py XXXXX (Replace XXXXX with the port to listen to)
-
-# API Key
-API keys are found at the following link:
-https://platform.openai.com/api-keys
-API Keys are entered under the "More" tab.
-
-# User Registration
-1. On the login page, click the register button.
-2. Enter a desired username, password, and team id
-4. Click register
-5. User can now login with given username and password
-
-# Management
-- Adding Teams:
-  1. From the management homepage, click the "Create Team" tab
-  2. Enter the team's desired name
-  3. Click create team
-  4. The team's id, which is used for creating accounts, can be found under the "View Teams" tab on the management homepage
-
-# Viewing Past Chats
-Past Chats can be viewed by following next steps:
-1. From the management homepage, click the "View Teams" tab.
-2. Click the desired team.
-3. Click on the desired chat.
-Past chats are stored under the chats folder, in json format.  The files are named by their team id.
+    - pip install --upgrade openai
+    - pip install --upgrade bcrypt
+    - pip install --upgrade flask
+    - pip install --ipgrade sqlite3
+3. Create the database by following the steps:
+    1. python3 admincode.py
+    2. Type "x" then click enter
+    3. Type "y" then click enter
+4. Create managers by following the steps:
+    1. Type "1" then click enter
+    2. enter a desired username and click enter
+    3. enter a desired password and click enter
+5. admincode.py can now by closed by typing "q" then clicking enter     
+6. Run the website with one of the following:
+    - python3 webapp.py
+    - python3 webapp.py XXXXX (Replace XXXXX with the port to listen to)
+    - nohup python3 webapp.py XXXXX & (Replace XXXXX with the port to listen to)
+  
+## File Storage
+- User chats are stored in the chats directory in .json format.
+- system logs are stored in the system_logs directory in .txt format.
