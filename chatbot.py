@@ -84,5 +84,6 @@ class Bot():
 
         # Stage 5    
         if self.chat_stage == 5:
+            self.static_log += self.message_log
             self.message_log = [{'role': 'assistant', 'content': default_prompts[6]}]
             self.chat_stage += 1
