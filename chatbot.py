@@ -66,6 +66,7 @@ class Bot():
                 if self.plans_stage >= len(self.plans):
                     self.chat_stage += 1
                 else:
+                    self.static_log += self.message_log
                     self.message_log = [{'role': 'system', 'content': default_prompts[4] + self.plans[self.plans_stage] + default_prompts[5]}]
             if self.chat_stage == 4:
                 completion = self.client.chat.completions.create(model="gpt-3.5-turbo", messages=self.message_log)
@@ -76,6 +77,7 @@ class Bot():
                     if self.plans_stage >= len(self.plans):
                         self.chat_stage += 1
                     else:
+                        self.static_log += self.message_log
                         self.message_log = [{'role': 'system', 'content': default_prompts[4] + self.plans[self.plans_stage] + default_prompts[5]}]
                         completion = self.client.chat.completions.create(model="gpt-3.5-turbo", messages=self.message_log)
                         self.message_log += [{'role': 'assistant', 'content': completion.choices[0].message.content}]
