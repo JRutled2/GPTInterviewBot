@@ -50,7 +50,8 @@ def user_chat():
         try:
             app.config[session['userid']].chat(request.form['chat'])
             session['message_log'] = app.config[session['userid']].get_log()
-        except:
+        except Exception as e:
+            log(session['uname'], f'An error occureed: {type(e).__name__}')
             session['message_log'] += [{'role': 'assistant', 'content': 'Error, please contact an Administrator.'}]
 
     # If statement for when the user is finished chatting
