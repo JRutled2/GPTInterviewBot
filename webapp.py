@@ -48,8 +48,8 @@ def user_chat():
     # If statement for when the user is currently chatting
     if 'chat' in request.form:
         try:
-            app.config['bot'].chat(request.form['chat'])
-            session['message_log'] = app.config['bot'].get_log()
+            app.config[session['userid']].chat(request.form['chat'])
+            session['message_log'] = app.config[session['userid']].get_log()
         except:
             session['message_log'] += [{'role': 'assistant', 'content': 'Error, please contact an Administrator.'}]
 
@@ -59,10 +59,10 @@ def user_chat():
         return redirect(url_for('logout'))
     # Else statement for initial chat message, necessary for when the message log is empty
     else:
-        app.config['bot'].chat('')
-        session['message_log'] = app.config['bot'].get_log()
+        app.config[session['userid']].chat('')
+        session['message_log'] = app.config[session['userid']].get_log()
 
-    if app.config['bot'].chat_stage == 5:
+    if app.config[session['userid']].chat_stage == 5:
         save_chat()
 
     # Renders the chat page
@@ -344,11 +344,11 @@ def login():
         session['message_log'] = []
 
         # Stores the gpt bot in the app.config
-        app.config['bot'] = Bot(gpt_key)
+        app.config[session['userid']] = Bot(gpt_key)
 
         # Sets the gpt bot variables
-        app.config['bot'].team_name = session['team_name']
-        app.config['bot'].team_name = session['team_id']
+        app.config[session['userid']].team_name = session['team_name']
+        app.config[session['userid']].team_name = session['team_id']
 
     return redirect(url_for('index'))
 
@@ -359,12 +359,15 @@ def logout():
         save_chat()
 
     log(session['uname'], 'logged out')
-    # Clears the session variables
-    session.clear()
 
     # Clears the gpt bot if applicable
     if 'bot' in app.config:
-        app.config.pop('bot')
+        app.config.pop(session['userid'])
+
+    # Clears the session variables
+    session.clear()
+
+    
     
     # Redirects to login page
     return redirect(url_for('index'))
