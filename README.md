@@ -6,7 +6,7 @@
     - pip install --upgrade openai
     - pip install --upgrade bcrypt
     - pip install --upgrade flask
-    - pip install --ipgrade sqlite3
+    - pip install --upgrade sqlite3
 3. Create the database by following the steps:
     1. python3 admincode.py
     2. Type "x" then click enter
